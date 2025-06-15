@@ -142,18 +142,25 @@ class BeanDefinitionLoader {
 
 	private void load(Object source) {
 		Assert.notNull(source, "Source must not be null");
+		// 资源是 Class
 		if (source instanceof Class<?>) {
 			load((Class<?>) source);
 			return;
 		}
+
+		// 资源是 Resource
 		if (source instanceof Resource) {
 			load((Resource) source);
 			return;
 		}
+
+		// 资源是 Package
 		if (source instanceof Package) {
 			load((Package) source);
 			return;
 		}
+
+		// 资源是字符串
 		if (source instanceof CharSequence) {
 			load((CharSequence) source);
 			return;

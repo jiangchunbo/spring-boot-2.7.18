@@ -54,15 +54,25 @@ class DefaultApplicationContextFactory implements ApplicationContextFactory {
 		}
 	}
 
+	/**
+	 * 从 spring.factories 中获取实例对象
+	 */
 	private <T> T getFromSpringFactories(WebApplicationType webApplicationType,
 			BiFunction<ApplicationContextFactory, WebApplicationType, T> action, Supplier<T> defaultResult) {
-		for (ApplicationContextFactory candidate : SpringFactoriesLoader.loadFactories(ApplicationContextFactory.class,
-				getClass().getClassLoader())) {
+
+		// 从 spring.factories 加载 ApplicationContextFactory
+		// 实际上就两种， Servlet 和 Reactive
+		//
+		// 如果 T 是 Environment。你的项目仅仅引入了 spring-boot-starter 而已，那么这两个都不会给你创建 Environment
+		// 因为它们会判断 WebApplicationType 类型，跟自己不匹配就返回 null
+		for (ApplicationContextFactory candidate : SpringFactoriesLoader.loadFactories(ApplicationContextFactory.class, getClass().getClassLoader())) {
 			T result = action.apply(candidate, webApplicationType);
 			if (result != null) {
 				return result;
 			}
 		}
+
+		// 如果上面没有创建出来，那么就可能走默认的？
 		return (defaultResult != null) ? defaultResult.get() : null;
 	}
 

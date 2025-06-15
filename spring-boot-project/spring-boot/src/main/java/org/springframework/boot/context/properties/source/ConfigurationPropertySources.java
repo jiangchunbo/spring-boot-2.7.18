@@ -51,6 +51,7 @@ public final class ConfigurationPropertySources {
 	 * underlying set of {@link PropertySources}. Provides an
 	 * {@link ConfigurationPropertySource} aware and optimized alternative to
 	 * {@link PropertySourcesPropertyResolver}.
+	 *
 	 * @param propertySources the set of {@link PropertySource} objects to use
 	 * @return a {@link ConfigurablePropertyResolver} implementation
 	 * @since 2.5.0
@@ -63,6 +64,7 @@ public final class ConfigurationPropertySources {
 	 * Determines if the specific {@link PropertySource} is the
 	 * {@link ConfigurationPropertySource} that was {@link #attach(Environment) attached}
 	 * to the {@link Environment}.
+	 *
 	 * @param propertySource the property source to test
 	 * @return {@code true} if this is the attached {@link ConfigurationPropertySource}
 	 */
@@ -79,18 +81,27 @@ public final class ConfigurationPropertySources {
 	 * <p>
 	 * The attached resolver will dynamically track any additions or removals from the
 	 * underlying {@link Environment} property sources.
+	 *
 	 * @param environment the source environment (must be an instance of
-	 * {@link ConfigurableEnvironment})
+	 *                    {@link ConfigurableEnvironment})
 	 * @see #get(Environment)
 	 */
 	public static void attach(Environment environment) {
 		Assert.isInstanceOf(ConfigurableEnvironment.class, environment);
+
+		// 从环境中获取 Mutable 属性源。意思就是说可以变化的属性源。
 		MutablePropertySources sources = ((ConfigurableEnvironment) environment).getPropertySources();
+
+		// 获得一个名字叫 configurationProperties 的属性源
 		PropertySource<?> attached = getAttached(sources);
+
+
 		if (attached == null || !isUsingSources(attached, sources)) {
-			attached = new ConfigurationPropertySourcesPropertySource(ATTACHED_PROPERTY_SOURCE_NAME,
-					new SpringConfigurationPropertySources(sources));
+			// ConfigurationPropertySourcesPropertySource 这个属性源是 Spring Boot 设计的
+			attached = new ConfigurationPropertySourcesPropertySource(ATTACHED_PROPERTY_SOURCE_NAME, new SpringConfigurationPropertySources(sources));
 		}
+
+		// 删除原来的 attached 属性源（不管有没有），然后再加入一个新的到开头
 		sources.remove(ATTACHED_PROPERTY_SOURCE_NAME);
 		sources.addFirst(attached);
 	}
@@ -107,17 +118,18 @@ public final class ConfigurationPropertySources {
 	/**
 	 * Return a set of {@link ConfigurationPropertySource} instances that have previously
 	 * been {@link #attach(Environment) attached} to the {@link Environment}.
+	 *
 	 * @param environment the source environment (must be an instance of
-	 * {@link ConfigurableEnvironment})
+	 *                    {@link ConfigurableEnvironment})
 	 * @return an iterable set of configuration property sources
 	 * @throws IllegalStateException if not configuration property sources have been
-	 * attached
+	 *                               attached
 	 */
 	public static Iterable<ConfigurationPropertySource> get(Environment environment) {
 		Assert.isInstanceOf(ConfigurableEnvironment.class, environment);
 		MutablePropertySources sources = ((ConfigurableEnvironment) environment).getPropertySources();
 		ConfigurationPropertySourcesPropertySource attached = (ConfigurationPropertySourcesPropertySource) sources
-			.get(ATTACHED_PROPERTY_SOURCE_NAME);
+				.get(ATTACHED_PROPERTY_SOURCE_NAME);
 		if (attached == null) {
 			return from(sources);
 		}
@@ -127,6 +139,7 @@ public final class ConfigurationPropertySources {
 	/**
 	 * Return {@link Iterable} containing a single new {@link ConfigurationPropertySource}
 	 * adapted from the given Spring {@link PropertySource}.
+	 *
 	 * @param source the Spring property source to adapt
 	 * @return an {@link Iterable} containing a single newly adapted
 	 * {@link SpringConfigurationPropertySource}
@@ -144,6 +157,7 @@ public final class ConfigurationPropertySources {
 	 * identified by changes in the sources returned by its iterator, will be
 	 * automatically tracked. The underlying source should be thread safe, for example a
 	 * {@link MutablePropertySources}
+	 *
 	 * @param sources the Spring property sources to adapt
 	 * @return an {@link Iterable} containing newly adapted
 	 * {@link SpringConfigurationPropertySource} instances
@@ -154,8 +168,8 @@ public final class ConfigurationPropertySources {
 
 	private static Stream<PropertySource<?>> streamPropertySources(PropertySources sources) {
 		return sources.stream()
-			.flatMap(ConfigurationPropertySources::flatten)
-			.filter(ConfigurationPropertySources::isIncluded);
+				.flatMap(ConfigurationPropertySources::flatten)
+				.filter(ConfigurationPropertySources::isIncluded);
 	}
 
 	private static Stream<PropertySource<?>> flatten(PropertySource<?> source) {

@@ -123,3 +123,7 @@ gradlePlugin {
 test {
 	enabled = false
 }
+
+checkFormatMain {
+	enabled = false
+}

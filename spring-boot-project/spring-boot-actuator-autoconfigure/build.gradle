@@ -201,12 +201,14 @@ task dependencyVersions(type: org.springframework.boot.build.constraints.Extract
 }
 
 asciidoctor {
+	enabled = false
 	sources {
 		include "index.adoc"
 	}
 }
 
 task asciidoctorPdf(type: org.asciidoctor.gradle.jvm.AsciidoctorTask) {
+	enabled = false
 	sources {
 		include "index.adoc"
 	}

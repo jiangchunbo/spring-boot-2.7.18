@@ -242,7 +242,7 @@ public class WebMvcAutoConfiguration {
 
 		/**
 		 * 配置路径匹配
-		 * @param configurer
+		` * @param configurer
 		 */
 		@Override
 		public void configurePathMatch(PathMatchConfigurer configurer) {

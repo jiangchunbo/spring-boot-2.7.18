@@ -32,7 +32,7 @@ import org.springframework.util.Assert;
 
 /**
  * Contains {@code @Configuration} import candidates, usually auto-configurations.
- *
+ * <p>
  * The {@link #load(Class, ClassLoader)} method can be used to discover the import
  * candidates.
  *
@@ -59,23 +59,29 @@ public final class ImportCandidates implements Iterable<String> {
 
 	/**
 	 * Loads the names of import candidates from the classpath.
-	 *
+	 * <p>
 	 * The names of the import candidates are stored in files named
 	 * {@code META-INF/spring/full-qualified-annotation-name.imports} on the classpath.
 	 * Every line contains the full qualified name of the candidate class. Comments are
 	 * supported using the # character.
-	 * @param annotation annotation to load
+	 *
+	 * @param annotation  annotation to load
 	 * @param classLoader class loader to use for loading
 	 * @return list of names of annotated classes
 	 */
 	public static ImportCandidates load(Class<?> annotation, ClassLoader classLoader) {
 		Assert.notNull(annotation, "'annotation' must not be null");
 		ClassLoader classLoaderToUse = decideClassloader(classLoader);
+
+		// META-INF/spring/%s.imports  也就是说，注解全类名 + .imports 得到一个目录
 		String location = String.format(LOCATION, annotation.getName());
+
+		// 从 location 里面找资源
 		Enumeration<URL> urls = findUrlsInClasspath(classLoaderToUse, location);
 		List<String> importCandidates = new ArrayList<>();
 		while (urls.hasMoreElements()) {
 			URL url = urls.nextElement();
+			// 读取 URL 表示的资源的数据，一行一行的读取
 			importCandidates.addAll(readCandidateConfigurations(url));
 		}
 		return new ImportCandidates(importCandidates);
@@ -91,8 +97,7 @@ public final class ImportCandidates implements Iterable<String> {
 	private static Enumeration<URL> findUrlsInClasspath(ClassLoader classLoader, String location) {
 		try {
 			return classLoader.getResources(location);
-		}
-		catch (IOException ex) {
+		} catch (IOException ex) {
 			throw new IllegalArgumentException("Failed to load configurations from location [" + location + "]", ex);
 		}
 	}
@@ -111,8 +116,7 @@ public final class ImportCandidates implements Iterable<String> {
 				candidates.add(line);
 			}
 			return candidates;
-		}
-		catch (IOException ex) {
+		} catch (IOException ex) {
 			throw new IllegalArgumentException("Unable to load configurations from location [" + url + "]", ex);
 		}
 	}

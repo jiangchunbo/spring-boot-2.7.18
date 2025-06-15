@@ -155,10 +155,14 @@ public class ServletWebServerApplicationContext extends GenericWebApplicationCon
 		}
 	}
 
+	/**
+	 * Spring Boot onRefresh
+	 */
 	@Override
 	protected void onRefresh() {
 		super.onRefresh();
 		try {
+			// refresh 完毕，创建 WebServer
 			createWebServer();
 		}
 		catch (Throwable ex) {
@@ -179,8 +183,12 @@ public class ServletWebServerApplicationContext extends GenericWebApplicationCon
 		ServletContext servletContext = getServletContext();
 		if (webServer == null && servletContext == null) {
 			StartupStep createWebServer = this.getApplicationStartup().start("spring.boot.webserver.create");
+
+			// 获得 WebServer 的工厂
 			ServletWebServerFactory factory = getWebServerFactory();
 			createWebServer.tag("factory", factory.getClass().toString());
+
+			// 通过工厂创建 WebServer
 			this.webServer = factory.getWebServer(getSelfInitializer());
 			createWebServer.end();
 			getBeanFactory().registerSingleton("webServerGracefulShutdown",
@@ -207,11 +215,16 @@ public class ServletWebServerApplicationContext extends GenericWebApplicationCon
 	 */
 	protected ServletWebServerFactory getWebServerFactory() {
 		// Use bean names so that we don't consider the hierarchy
+		// ServletWebServerFactory 只能有 1 个
 		String[] beanNames = getBeanFactory().getBeanNamesForType(ServletWebServerFactory.class);
+
+		// 未找到报错
 		if (beanNames.length == 0) {
 			throw new MissingWebServerFactoryBeanException(getClass(), ServletWebServerFactory.class,
 					WebApplicationType.SERVLET);
 		}
+
+		// 找到多个报错
 		if (beanNames.length > 1) {
 			throw new ApplicationContextException("Unable to start ServletWebServerApplicationContext due to multiple "
 					+ "ServletWebServerFactory beans : " + StringUtils.arrayToCommaDelimitedString(beanNames));
