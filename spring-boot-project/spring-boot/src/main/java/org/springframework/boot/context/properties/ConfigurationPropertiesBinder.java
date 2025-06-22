@@ -89,6 +89,9 @@ class ConfigurationPropertiesBinder {
 		this.jsr303Present = ConfigurationPropertiesJsr303Validator.isJsr303Present(applicationContext);
 	}
 
+	/**
+	 * 绑定属性。似乎是将
+	 */
 	BindResult<?> bind(ConfigurationPropertiesBean propertiesBean) {
 		Bindable<?> target = propertiesBean.asBindTarget();
 		ConfigurationProperties annotation = propertiesBean.getAnnotation();

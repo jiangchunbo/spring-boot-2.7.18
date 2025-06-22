@@ -75,6 +75,8 @@ public class ConfigurationPropertiesBindingPostProcessor
 
 	@Override
 	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+		// 获取一个对象 ConfigurationPropertiesBean
+		// 然后用这个对象 bind
 		bind(ConfigurationPropertiesBean.get(this.applicationContext, bean, beanName));
 		return bean;
 	}
@@ -86,6 +88,7 @@ public class ConfigurationPropertiesBindingPostProcessor
 		Assert.state(bean.getBindMethod() == BindMethod.JAVA_BEAN, "Cannot bind @ConfigurationProperties for bean '"
 				+ bean.getName() + "'. Ensure that @ConstructorBinding has not been applied to regular bean");
 		try {
+			// 使用 binder 将 Environment 属性赋给 bean
 			this.binder.bind(bean);
 		}
 		catch (Exception ex) {
@@ -106,6 +109,9 @@ public class ConfigurationPropertiesBindingPostProcessor
 	 */
 	public static void register(BeanDefinitionRegistry registry) {
 		Assert.notNull(registry, "Registry must not be null");
+
+		// beanName = ConfigurationPropertiesBindingPostProcessor.class.getName()
+
 		if (!registry.containsBeanDefinition(BEAN_NAME)) {
 			BeanDefinition definition = BeanDefinitionBuilder
 				.rootBeanDefinition(ConfigurationPropertiesBindingPostProcessor.class)

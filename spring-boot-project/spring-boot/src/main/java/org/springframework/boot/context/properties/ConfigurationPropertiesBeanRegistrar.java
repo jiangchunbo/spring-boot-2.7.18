@@ -49,21 +49,30 @@ final class ConfigurationPropertiesBeanRegistrar {
 	}
 
 	void register(Class<?> type) {
+		// 就是看 type 表示的那个属性类上面有没有 @ConfigurationProperties 注解，因为可能配置了一些前缀 prefix
 		MergedAnnotation<ConfigurationProperties> annotation = MergedAnnotations
 			.from(type, SearchStrategy.TYPE_HIERARCHY)
 			.get(ConfigurationProperties.class);
+
+		// 根据 type 以及注解注册
 		register(type, annotation);
 	}
 
 	void register(Class<?> type, MergedAnnotation<ConfigurationProperties> annotation) {
+		// 得到一个 name，所以，这些配置类也有自己独特的 beanName 生成方式
 		String name = getName(type, annotation);
+
+		// 如果没有这个 beanName，那么就注册
 		if (!containsBeanDefinition(name)) {
 			registerBeanDefinition(name, type, annotation);
 		}
 	}
 
 	private String getName(Class<?> type, MergedAnnotation<ConfigurationProperties> annotation) {
+		// 获取前缀，也可能没有前缀
 		String prefix = annotation.isPresent() ? annotation.getString("prefix") : "";
+
+		// prefix-typeName 或者直接光秃秃 typeName
 		return (StringUtils.hasText(prefix) ? prefix + "-" + type.getName() : type.getName());
 	}
 
@@ -86,13 +95,23 @@ final class ConfigurationPropertiesBeanRegistrar {
 			MergedAnnotation<ConfigurationProperties> annotation) {
 		Assert.state(annotation.isPresent(), () -> "No " + ConfigurationProperties.class.getSimpleName()
 				+ " annotation found on  '" + type.getName() + "'.");
+
+		// 创建一个 BeanDefinition
 		this.registry.registerBeanDefinition(beanName, createBeanDefinition(beanName, type));
 	}
 
 	private BeanDefinition createBeanDefinition(String beanName, Class<?> type) {
+		// 这可不是什么 Java 反射 Method
+		// 指的是，使用何种 way 进行绑定：Java Bean 还是使用构造器绑定
 		BindMethod bindMethod = BindMethod.forType(type);
+
+		// 使用 type 创建一个 RootBeanDefinition，很正常的操作
 		RootBeanDefinition definition = new RootBeanDefinition(type);
+
+		// 设置一个属性，不要忘了，BeanDefinition 实现了 AttributeAccessor，因此有属性存取能力
 		definition.setAttribute(BindMethod.class.getName(), bindMethod);
+
+		// 如果是构造器绑定，那么使用 InstanceSupplier
 		if (bindMethod == BindMethod.VALUE_OBJECT) {
 			definition.setInstanceSupplier(() -> createValueObject(beanName, type));
 		}
@@ -101,8 +120,11 @@ final class ConfigurationPropertiesBeanRegistrar {
 
 	private Object createValueObject(String beanName, Class<?> beanType) {
 		ConfigurationPropertiesBean bean = ConfigurationPropertiesBean.forValueObject(beanType, beanName);
+
+		// 从 bean factory 获得 ConfigurationPropertiesBinder 对象
 		ConfigurationPropertiesBinder binder = ConfigurationPropertiesBinder.get(this.beanFactory);
 		try {
+			// 借助 ConfigurationPropertiesBinder 的能力，绑定或创建 bean
 			return binder.bindOrCreate(bean);
 		}
 		catch (Exception ex) {

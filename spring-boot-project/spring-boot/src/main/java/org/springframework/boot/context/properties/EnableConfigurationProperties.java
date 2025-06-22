@@ -37,7 +37,7 @@ import org.springframework.context.annotation.Import;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Import(EnableConfigurationPropertiesRegistrar.class)
+@Import(EnableConfigurationPropertiesRegistrar.class) // 导入了一个类，可能导入多次，但是不用担心
 public @interface EnableConfigurationProperties {
 
 	/**

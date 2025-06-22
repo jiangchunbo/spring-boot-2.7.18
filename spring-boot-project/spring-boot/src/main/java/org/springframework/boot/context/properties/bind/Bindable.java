@@ -47,12 +47,18 @@ public final class Bindable<T> {
 
 	private static final EnumSet<BindRestriction> NO_BIND_RESTRICTIONS = EnumSet.noneOf(BindRestriction.class);
 
+	/**
+	 * 精确描述要绑定的类型，包括泛型信息
+	 */
 	private final ResolvableType type;
 
 	private final ResolvableType boxedType;
 
 	private final Supplier<T> value;
 
+	/**
+	 * 目标类型或实例上可能影响绑定行为的注解（如 @ConstructorBinding）
+	 */
 	private final Annotation[] annotations;
 
 	private final EnumSet<BindRestriction> bindRestrictions;

@@ -59,12 +59,21 @@ import org.springframework.validation.annotation.Validated;
  */
 public final class ConfigurationPropertiesBean {
 
+	/**
+	 * beanName
+	 */
 	private final String name;
 
+	/**
+	 * 要绑定的对象
+	 */
 	private final Object instance;
 
 	private final ConfigurationProperties annotation;
 
+	/**
+	 * AI 比作 Binder 的靶子，它把 Binder 需要的一切元数据（类型、已有实例、注解、绑定限制等）封装在一起
+	 */
 	private final Bindable<?> bindTarget;
 
 	private final BindMethod bindMethod;
@@ -314,6 +323,8 @@ public final class ConfigurationPropertiesBean {
 		VALUE_OBJECT;
 
 		static BindMethod forType(Class<?> type) {
+			// 我几乎从没用过构造器绑定
+			// 一般都是 Java Bean 绑定把
 			return (ConfigurationPropertiesBindConstructorProvider.INSTANCE.getBindConstructor(type, false) != null)
 					? VALUE_OBJECT : JAVA_BEAN;
 		}

@@ -39,22 +39,30 @@ import org.springframework.core.type.AnnotationMetadata;
 class EnableConfigurationPropertiesRegistrar implements ImportBeanDefinitionRegistrar {
 
 	private static final String METHOD_VALIDATION_EXCLUDE_FILTER_BEAN_NAME = Conventions
-		.getQualifiedAttributeName(EnableConfigurationPropertiesRegistrar.class, "methodValidationExcludeFilter");
+			.getQualifiedAttributeName(EnableConfigurationPropertiesRegistrar.class, "methodValidationExcludeFilter");
 
 	@Override
 	public void registerBeanDefinitions(AnnotationMetadata metadata, BeanDefinitionRegistry registry) {
 		registerInfrastructureBeans(registry);
 		registerMethodValidationExcludeFilter(registry);
 		ConfigurationPropertiesBeanRegistrar beanRegistrar = new ConfigurationPropertiesBeanRegistrar(registry);
+
+
+		// getTypes -> 从注解上获取 EnableConfigurationProperties 所有的类型
+		// 然后注册
 		getTypes(metadata).forEach(beanRegistrar::register);
 	}
 
 	private Set<Class<?>> getTypes(AnnotationMetadata metadata) {
+		// 获取注解
 		return metadata.getAnnotations()
-			.stream(EnableConfigurationProperties.class)
-			.flatMap((annotation) -> Arrays.stream(annotation.getClassArray(MergedAnnotation.VALUE)))
-			.filter((type) -> void.class != type)
-			.collect(Collectors.toSet());
+				// 过滤 EnableConfigurationProperties
+				.stream(EnableConfigurationProperties.class)
+				// 展开 Class[]
+				.flatMap((annotation) -> Arrays.stream(annotation.getClassArray(MergedAnnotation.VALUE)))
+				// 类型不是能 void.class
+				.filter((type) -> void.class != type)
+				.collect(Collectors.toSet());
 	}
 
 	static void registerInfrastructureBeans(BeanDefinitionRegistry registry) {
@@ -65,10 +73,10 @@ class EnableConfigurationPropertiesRegistrar implements ImportBeanDefinitionRegi
 	static void registerMethodValidationExcludeFilter(BeanDefinitionRegistry registry) {
 		if (!registry.containsBeanDefinition(METHOD_VALIDATION_EXCLUDE_FILTER_BEAN_NAME)) {
 			BeanDefinition definition = BeanDefinitionBuilder
-				.genericBeanDefinition(MethodValidationExcludeFilter.class,
-						() -> MethodValidationExcludeFilter.byAnnotation(ConfigurationProperties.class))
-				.setRole(BeanDefinition.ROLE_INFRASTRUCTURE)
-				.getBeanDefinition();
+					.genericBeanDefinition(MethodValidationExcludeFilter.class,
+							() -> MethodValidationExcludeFilter.byAnnotation(ConfigurationProperties.class))
+					.setRole(BeanDefinition.ROLE_INFRASTRUCTURE)
+					.getBeanDefinition();
 			registry.registerBeanDefinition(METHOD_VALIDATION_EXCLUDE_FILTER_BEAN_NAME, definition);
 		}
 	}

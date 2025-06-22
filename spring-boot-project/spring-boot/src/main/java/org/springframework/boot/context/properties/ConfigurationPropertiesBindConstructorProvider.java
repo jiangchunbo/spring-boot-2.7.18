@@ -45,6 +45,8 @@ class ConfigurationPropertiesBindConstructorProvider implements BindConstructorP
 		if (type == null) {
 			return null;
 		}
+
+		// 你可以理解为就是找 @ConstructorBinding 注解的构造器
 		Constructor<?> constructor = findConstructorBindingAnnotatedConstructor(type);
 		if (constructor == null && (isConstructorBindingType(type) || isNestedConstructorBinding)) {
 			constructor = deduceBindConstructor(type);
