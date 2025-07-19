@@ -32,6 +32,8 @@ import org.springframework.util.ReflectionUtils;
 
 /**
  * A collection of {@link SpringApplicationRunListener}.
+ * <p>
+ * 作者都说了，这个类就是 SpringApplicationRunListener 的集合
  *
  * @author Phillip Webb
  * @author Andy Wilkinson
@@ -46,7 +48,7 @@ class SpringApplicationRunListeners {
 	private final ApplicationStartup applicationStartup;
 
 	SpringApplicationRunListeners(Log log, Collection<? extends SpringApplicationRunListener> listeners,
-			ApplicationStartup applicationStartup) {
+								  ApplicationStartup applicationStartup) {
 		this.log = log;
 		this.listeners = new ArrayList<>(listeners);
 		this.applicationStartup = applicationStartup;
@@ -91,18 +93,16 @@ class SpringApplicationRunListeners {
 	}
 
 	private void callFailedListener(SpringApplicationRunListener listener, ConfigurableApplicationContext context,
-			Throwable exception) {
+									Throwable exception) {
 		try {
 			listener.failed(context, exception);
-		}
-		catch (Throwable ex) {
+		} catch (Throwable ex) {
 			if (exception == null) {
 				ReflectionUtils.rethrowRuntimeException(ex);
 			}
 			if (this.log.isDebugEnabled()) {
 				this.log.error("Error handling failed", ex);
-			}
-			else {
+			} else {
 				String message = ex.getMessage();
 				message = (message != null) ? message : "no error message";
 				this.log.warn("Error handling failed (" + message + ")");
@@ -115,7 +115,7 @@ class SpringApplicationRunListeners {
 	}
 
 	private void doWithListeners(String stepName, Consumer<SpringApplicationRunListener> listenerAction,
-			Consumer<StartupStep> stepAction) {
+								 Consumer<StartupStep> stepAction) {
 		StartupStep step = this.applicationStartup.start(stepName);
 		this.listeners.forEach(listenerAction);
 		if (stepAction != null) {

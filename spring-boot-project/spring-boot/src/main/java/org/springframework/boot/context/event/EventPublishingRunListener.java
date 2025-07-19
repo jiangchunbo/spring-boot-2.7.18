@@ -60,8 +60,14 @@ public class EventPublishingRunListener implements SpringApplicationRunListener,
 	private final SimpleApplicationEventMulticaster initialMulticaster;
 
 	public EventPublishingRunListener(SpringApplication application, String[] args) {
+		// Spring Boot 应用
 		this.application = application;
+
+		// 传入参数
 		this.args = args;
+
+		// 创建了一个自己的应用事件多播器，然后将 spring application 里面的事件加入到了里面
+		// 这是一个 初始的多播器
 		this.initialMulticaster = new SimpleApplicationEventMulticaster();
 		for (ApplicationListener<?> listener : application.getListeners()) {
 			this.initialMulticaster.addApplicationListener(listener);
@@ -76,12 +82,12 @@ public class EventPublishingRunListener implements SpringApplicationRunListener,
 	@Override
 	public void starting(ConfigurableBootstrapContext bootstrapContext) {
 		this.initialMulticaster
-			.multicastEvent(new ApplicationStartingEvent(bootstrapContext, this.application, this.args));
+				.multicastEvent(new ApplicationStartingEvent(bootstrapContext, this.application, this.args));
 	}
 
 	@Override
 	public void environmentPrepared(ConfigurableBootstrapContext bootstrapContext,
-			ConfigurableEnvironment environment) {
+									ConfigurableEnvironment environment) {
 		this.initialMulticaster.multicastEvent(
 				new ApplicationEnvironmentPreparedEvent(bootstrapContext, this.application, this.args, environment));
 	}
@@ -89,7 +95,7 @@ public class EventPublishingRunListener implements SpringApplicationRunListener,
 	@Override
 	public void contextPrepared(ConfigurableApplicationContext context) {
 		this.initialMulticaster
-			.multicastEvent(new ApplicationContextInitializedEvent(this.application, this.args, context));
+				.multicastEvent(new ApplicationContextInitializedEvent(this.application, this.args, context));
 	}
 
 	@Override
@@ -122,13 +128,12 @@ public class EventPublishingRunListener implements SpringApplicationRunListener,
 			// Listeners have been registered to the application context so we should
 			// use it at this point if we can
 			context.publishEvent(event);
-		}
-		else {
+		} else {
 			// An inactive context may not have a multicaster so we use our multicaster to
 			// call all the context's listeners instead
 			if (context instanceof AbstractApplicationContext) {
 				for (ApplicationListener<?> listener : ((AbstractApplicationContext) context)
-					.getApplicationListeners()) {
+						.getApplicationListeners()) {
 					this.initialMulticaster.addApplicationListener(listener);
 				}
 			}
