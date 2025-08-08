@@ -82,6 +82,9 @@ public class DelegatingFilterProxyRegistrationBean extends AbstractFilterRegistr
 		return this.targetBeanName;
 	}
 
+	/**
+	 * 返回一个特殊的 Filter
+	 */
 	@Override
 	public DelegatingFilterProxy getFilter() {
 		return new DelegatingFilterProxy(this.targetBeanName, getWebApplicationContext()) {

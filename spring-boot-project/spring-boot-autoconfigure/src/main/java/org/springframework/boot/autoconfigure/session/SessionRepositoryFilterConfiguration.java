@@ -43,8 +43,14 @@ class SessionRepositoryFilterConfiguration {
 	@Bean
 	DelegatingFilterProxyRegistrationBean sessionRepositoryFilterRegistration(SessionProperties sessionProperties,
 			ListableBeanFactory beanFactory) {
+		// 拿到 SessionRepositoryFilter 的 beanName
 		String[] targetBeanNames = beanFactory.getBeanNamesForType(SessionRepositoryFilter.class, false, false);
+
+		// 有且只有 1 个
 		Assert.state(targetBeanNames.length == 1, "Expected single SessionRepositoryFilter bean");
+
+		// 创建一个特殊的 RegistrationBean，传入 beanName
+		// 当 doFilter 的时候才会创建 Filter 实例
 		DelegatingFilterProxyRegistrationBean registration = new DelegatingFilterProxyRegistrationBean(
 				targetBeanNames[0]);
 		registration.setDispatcherTypes(getDispatcherTypes(sessionProperties));

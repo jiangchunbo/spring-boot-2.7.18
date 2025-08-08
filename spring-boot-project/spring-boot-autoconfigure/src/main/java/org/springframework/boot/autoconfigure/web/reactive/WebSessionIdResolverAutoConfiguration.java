@@ -37,6 +37,8 @@ import org.springframework.web.server.session.WebSessionManager;
 
 /**
  * Auto-configuration for {@link WebSessionIdResolver}.
+ * <p>
+ * 给 WebSessionIdResolver 开启自动配置，这个是做什么的呢？用于从请求解析 SessionId
  *
  * @author Phillip Webb
  * @author Brian Clozel
@@ -45,8 +47,8 @@ import org.springframework.web.server.session.WebSessionManager;
  */
 @AutoConfiguration
 @ConditionalOnWebApplication(type = Type.REACTIVE)
-@ConditionalOnClass({ WebSessionManager.class, Mono.class })
-@EnableConfigurationProperties({ WebFluxProperties.class, ServerProperties.class })
+@ConditionalOnClass({WebSessionManager.class, Mono.class})
+@EnableConfigurationProperties({WebFluxProperties.class, ServerProperties.class})
 public class WebSessionIdResolverAutoConfiguration {
 
 	private final ServerProperties serverProperties;
@@ -54,7 +56,7 @@ public class WebSessionIdResolverAutoConfiguration {
 	private final WebFluxProperties webFluxProperties;
 
 	public WebSessionIdResolverAutoConfiguration(ServerProperties serverProperties,
-			WebFluxProperties webFluxProperties) {
+												 WebFluxProperties webFluxProperties) {
 		this.serverProperties = serverProperties;
 		this.webFluxProperties = webFluxProperties;
 		assertNoMutuallyExclusiveProperties(serverProperties, webFluxProperties);
@@ -62,7 +64,7 @@ public class WebSessionIdResolverAutoConfiguration {
 
 	@SuppressWarnings("deprecation")
 	private void assertNoMutuallyExclusiveProperties(ServerProperties serverProperties,
-			WebFluxProperties webFluxProperties) {
+													 WebFluxProperties webFluxProperties) {
 		MutuallyExclusiveConfigurationPropertiesException.throwIfMultipleNonNullValuesIn((entries) -> {
 			entries.put("spring.webflux.session.cookie.same-site",
 					webFluxProperties.getSession().getCookie().getSameSite());
@@ -71,9 +73,13 @@ public class WebSessionIdResolverAutoConfiguration {
 		});
 	}
 
+	/**
+	 * 默认的解析 SessionId 的工具
+	 */
 	@Bean
 	@ConditionalOnMissingBean
 	public WebSessionIdResolver webSessionIdResolver() {
+		// 创建一个从 Cookie 中解析 SessionId 的计息期
 		CookieWebSessionIdResolver resolver = new CookieWebSessionIdResolver();
 		String cookieName = this.serverProperties.getReactive().getSession().getCookie().getName();
 		if (StringUtils.hasText(cookieName)) {
