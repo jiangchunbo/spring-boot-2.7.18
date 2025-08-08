@@ -81,7 +81,7 @@ import org.springframework.core.io.support.SpringFactoriesLoader;
 @Documented
 @Inherited
 @AutoConfigurationPackage
-@Import(AutoConfigurationImportSelector.class)
+@Import(AutoConfigurationImportSelector.class) // Spring Boot 自动配置的关键注解
 public @interface EnableAutoConfiguration {
 
 	/**
