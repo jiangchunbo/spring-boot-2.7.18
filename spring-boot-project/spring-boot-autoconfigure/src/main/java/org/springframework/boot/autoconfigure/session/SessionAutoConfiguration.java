@@ -79,16 +79,16 @@ import org.springframework.session.web.http.HttpSessionIdResolver;
  * @author Weix Sun
  * @since 1.4.0
  */
-//
+// 因为 Spring Session 支持很多存储方式，比如 JDBC Redis Hazelcast MongoD，所以要在这些自动配置之后再执行
 @AutoConfiguration(
-		after = {DataSourceAutoConfiguration.class, HazelcastAutoConfiguration.class,
+		after = { DataSourceAutoConfiguration.class, HazelcastAutoConfiguration.class,
 				JdbcTemplateAutoConfiguration.class, MongoDataAutoConfiguration.class,
 				MongoReactiveDataAutoConfiguration.class, RedisAutoConfiguration.class,
-				RedisReactiveAutoConfiguration.class, WebSessionIdResolverAutoConfiguration.class},
-		before = {HttpHandlerAutoConfiguration.class, WebFluxAutoConfiguration.class})
+				RedisReactiveAutoConfiguration.class, WebSessionIdResolverAutoConfiguration.class },
+		before = { HttpHandlerAutoConfiguration.class, WebFluxAutoConfiguration.class })
 @ConditionalOnClass(Session.class)
 @ConditionalOnWebApplication
-@EnableConfigurationProperties({ServerProperties.class, SessionProperties.class, WebFluxProperties.class})
+@EnableConfigurationProperties({ ServerProperties.class, SessionProperties.class, WebFluxProperties.class })
 public class SessionAutoConfiguration {
 
 	/**
@@ -96,13 +96,13 @@ public class SessionAutoConfiguration {
 	 */
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnWebApplication(type = Type.SERVLET)
-	@Import({ServletSessionRepositoryValidator.class, SessionRepositoryFilterConfiguration.class})
+	@Import({ ServletSessionRepositoryValidator.class, SessionRepositoryFilterConfiguration.class })
 	static class ServletSessionConfiguration {
 
 		@Bean
 		@Conditional(DefaultCookieSerializerCondition.class)
 		DefaultCookieSerializer cookieSerializer(ServerProperties serverProperties,
-												 ObjectProvider<DefaultCookieSerializerCustomizer> cookieSerializerCustomizers) {
+				ObjectProvider<DefaultCookieSerializerCustomizer> cookieSerializerCustomizers) {
 			Cookie cookie = serverProperties.getServlet().getSession().getCookie();
 			DefaultCookieSerializer cookieSerializer = new DefaultCookieSerializer();
 			PropertyMapper map = PropertyMapper.get().alwaysApplyingWhenNonNull();
@@ -131,8 +131,8 @@ public class SessionAutoConfiguration {
 
 		@Configuration(proxyBeanMethods = false)
 		@ConditionalOnMissingBean(SessionRepository.class)
-		@Import({ServletSessionRepositoryImplementationValidator.class,
-				ServletSessionConfigurationImportSelector.class})
+		@Import({ ServletSessionRepositoryImplementationValidator.class,
+				ServletSessionConfigurationImportSelector.class })
 		static class ServletSessionRepositoryConfiguration {
 
 		}
@@ -146,8 +146,8 @@ public class SessionAutoConfiguration {
 
 		@Configuration(proxyBeanMethods = false)
 		@ConditionalOnMissingBean(ReactiveSessionRepository.class)
-		@Import({ReactiveSessionRepositoryImplementationValidator.class,
-				ReactiveSessionConfigurationImportSelector.class})
+		@Import({ ReactiveSessionRepositoryImplementationValidator.class,
+				ReactiveSessionConfigurationImportSelector.class })
 		static class ReactiveSessionRepositoryConfiguration {
 
 		}
@@ -162,11 +162,17 @@ public class SessionAutoConfiguration {
 	 */
 	static class DefaultCookieSerializerCondition extends AnyNestedCondition {
 
+		// 整个是一个 2 选 1 的条件
+		// 这是为谁服务的呢？为 Cookie Session 服务
+
 		DefaultCookieSerializerCondition() {
 			super(ConfigurationPhase.REGISTER_BEAN);
 		}
 
-		@ConditionalOnMissingBean({HttpSessionIdResolver.class, CookieSerializer.class})
+		// 条件 1 即不存在 HttpSessionIdResolver 也不存在 CookieSerializer
+		// 如果存在 HttpSessionIdResolver 就不会装配，因为开发者可能定义了自己的解析器
+		// 如果存在 CookieSerializer 也不会生效，为啥呢？
+		@ConditionalOnMissingBean({ HttpSessionIdResolver.class, CookieSerializer.class })
 		static class NoComponentsAvailable {
 
 		}
@@ -231,7 +237,7 @@ public class SessionAutoConfiguration {
 		private final SessionProperties sessionProperties;
 
 		AbstractSessionRepositoryImplementationValidator(ApplicationContext applicationContext,
-														 SessionProperties sessionProperties, List<String> candidates) {
+				SessionProperties sessionProperties, List<String> candidates) {
 			this.classLoader = applicationContext.getClassLoader();
 			this.sessionProperties = sessionProperties;
 			this.candidates = candidates;
@@ -252,7 +258,8 @@ public class SessionAutoConfiguration {
 		private void addCandidateIfAvailable(List<Class<?>> candidates, String type) {
 			try {
 				candidates.add(Class.forName(type, false, this.classLoader));
-			} catch (Throwable ex) {
+			}
+			catch (Throwable ex) {
 				// Ignore
 			}
 		}
@@ -267,7 +274,7 @@ public class SessionAutoConfiguration {
 			extends AbstractSessionRepositoryImplementationValidator {
 
 		ServletSessionRepositoryImplementationValidator(ApplicationContext applicationContext,
-														SessionProperties sessionProperties) {
+				SessionProperties sessionProperties) {
 			super(applicationContext, sessionProperties,
 					Arrays.asList("org.springframework.session.hazelcast.HazelcastIndexedSessionRepository",
 							"org.springframework.session.jdbc.JdbcIndexedSessionRepository",
@@ -285,7 +292,7 @@ public class SessionAutoConfiguration {
 			extends AbstractSessionRepositoryImplementationValidator {
 
 		ReactiveSessionRepositoryImplementationValidator(ApplicationContext applicationContext,
-														 SessionProperties sessionProperties) {
+				SessionProperties sessionProperties) {
 			super(applicationContext, sessionProperties,
 					Arrays.asList("org.springframework.session.data.redis.ReactiveRedisSessionRepository",
 							"org.springframework.session.data.mongo.ReactiveMongoSessionRepository"));
@@ -305,7 +312,7 @@ public class SessionAutoConfiguration {
 		private final ObjectProvider<?> sessionRepositoryProvider;
 
 		protected AbstractSessionRepositoryValidator(SessionProperties sessionProperties,
-													 ObjectProvider<?> sessionRepositoryProvider) {
+				ObjectProvider<?> sessionRepositoryProvider) {
 			this.sessionProperties = sessionProperties;
 			this.sessionRepositoryProvider = sessionRepositoryProvider;
 		}
@@ -338,7 +345,7 @@ public class SessionAutoConfiguration {
 	static class ServletSessionRepositoryValidator extends AbstractSessionRepositoryValidator {
 
 		ServletSessionRepositoryValidator(SessionProperties sessionProperties,
-										  ObjectProvider<SessionRepository<?>> sessionRepositoryProvider) {
+				ObjectProvider<SessionRepository<?>> sessionRepositoryProvider) {
 			super(sessionProperties, sessionRepositoryProvider);
 		}
 
@@ -353,7 +360,7 @@ public class SessionAutoConfiguration {
 	static class ReactiveSessionRepositoryValidator extends AbstractSessionRepositoryValidator {
 
 		ReactiveSessionRepositoryValidator(SessionProperties sessionProperties,
-										   ObjectProvider<ReactiveSessionRepository<?>> sessionRepositoryProvider) {
+				ObjectProvider<ReactiveSessionRepository<?>> sessionRepositoryProvider) {
 			super(sessionProperties, sessionRepositoryProvider);
 		}
 
