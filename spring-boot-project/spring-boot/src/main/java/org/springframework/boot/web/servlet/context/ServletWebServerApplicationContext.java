@@ -242,10 +242,21 @@ public class ServletWebServerApplicationContext extends GenericWebApplicationCon
 		return this::selfInitialize;
 	}
 
+	/**
+	 * 这个方法很重要，它其实是一个 ServletContextInitializer 实现类的主体逻辑，其实也就是上面 getSelfInitializer 方法
+	 */
 	private void selfInitialize(ServletContext servletContext) throws ServletException {
+		// 设置属性什么的
 		prepareWebApplicationContext(servletContext);
+
+		// 注册什么范围
 		registerApplicationScope(servletContext);
+
+		// 实际上就是注册一些 bean
 		WebApplicationContextUtils.registerEnvironmentBeans(getBeanFactory(), servletContext);
+
+		// 获取一些 ServletContextInitializer，依次调用 onStartup
+		// 其实这里面就会拿到很多很多 RegistrationBean
 		for (ServletContextInitializer beans : getServletContextInitializerBeans()) {
 			beans.onStartup(servletContext);
 		}

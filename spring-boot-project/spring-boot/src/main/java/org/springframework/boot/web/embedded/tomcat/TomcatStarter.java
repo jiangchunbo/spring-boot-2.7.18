@@ -30,6 +30,8 @@ import org.springframework.boot.web.servlet.ServletContextInitializer;
 /**
  * {@link ServletContainerInitializer} used to trigger {@link ServletContextInitializer
  * ServletContextInitializers} and track startup errors.
+ * <p>
+ * 这个类的名字叫 TomcatStarter，但是它似乎负责将所有的 ServletContextInitializer 收集起来，然后在 onStartup 中一起调用
  *
  * @author Phillip Webb
  * @author Andy Wilkinson
@@ -42,6 +44,12 @@ class TomcatStarter implements ServletContainerInitializer {
 
 	private volatile Exception startUpException;
 
+	/**
+	 * 接收多个 ServletContextInitializer
+	 *
+	 * @param initializers 初始化器
+	 *                     由于这是一个函数式接口，所以他未必是一个实现类，甚至是一个方法而已，比如注册 Filter Servlet
+	 */
 	TomcatStarter(ServletContextInitializer[] initializers) {
 		this.initializers = initializers;
 	}
@@ -49,11 +57,12 @@ class TomcatStarter implements ServletContainerInitializer {
 	@Override
 	public void onStartup(Set<Class<?>> classes, ServletContext servletContext) throws ServletException {
 		try {
+			// 依次调用，很容易理解
 			for (ServletContextInitializer initializer : this.initializers) {
 				initializer.onStartup(servletContext);
 			}
-		}
-		catch (Exception ex) {
+		} catch (Exception ex) {
+			// 捕获异常
 			this.startUpException = ex;
 			// Prevent Tomcat from logging and re-throwing when we know we can
 			// deal with it in the main thread, but log for information here.

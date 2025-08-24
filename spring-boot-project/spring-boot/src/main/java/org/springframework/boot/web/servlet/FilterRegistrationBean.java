@@ -35,10 +35,10 @@ import org.springframework.util.Assert;
  *
  * @param <T> the type of {@link Filter} to register
  * @author Phillip Webb
- * @since 1.4.0
  * @see ServletContextInitializer
  * @see ServletContext#addFilter(String, Filter)
  * @see DelegatingFilterProxyRegistrationBean
+ * @since 1.4.0
  */
 public class FilterRegistrationBean<T extends Filter> extends AbstractFilterRegistrationBean<T> {
 
@@ -53,7 +53,8 @@ public class FilterRegistrationBean<T extends Filter> extends AbstractFilterRegi
 	/**
 	 * Create a new {@link FilterRegistrationBean} instance to be registered with the
 	 * specified {@link ServletRegistrationBean}s.
-	 * @param filter the filter to register
+	 *
+	 * @param filter                   the filter to register
 	 * @param servletRegistrationBeans associate {@link ServletRegistrationBean}s
 	 */
 	public FilterRegistrationBean(T filter, ServletRegistrationBean<?>... servletRegistrationBeans) {
@@ -69,6 +70,11 @@ public class FilterRegistrationBean<T extends Filter> extends AbstractFilterRegi
 
 	/**
 	 * Set the filter to be registered.
+	 * <p>
+	 * 设置要注册的 Filter。
+	 * <p>
+	 * 相比于 DelegatingFilterProxyRegistrationBean，这个实现类更简单，需要传入一个已经存在的 Filter。
+	 *
 	 * @param filter the filter
 	 */
 	public void setFilter(T filter) {

@@ -49,31 +49,60 @@ import org.springframework.security.web.context.AbstractSecurityWebApplicationIn
 @AutoConfiguration(after = SecurityAutoConfiguration.class)
 @ConditionalOnWebApplication(type = Type.SERVLET)
 @EnableConfigurationProperties(SecurityProperties.class)
-@ConditionalOnClass({ AbstractSecurityWebApplicationInitializer.class, SessionCreationPolicy.class })
+@ConditionalOnClass({AbstractSecurityWebApplicationInitializer.class, SessionCreationPolicy.class})
 public class SecurityFilterAutoConfiguration {
 
+	/**
+	 * 这个常量字符串是从 Spring Security Web 这个包里面引用的，也就是说这是 Spring Security 规定的特殊的 beanName
+	 */
 	private static final String DEFAULT_FILTER_NAME = AbstractSecurityWebApplicationInitializer.DEFAULT_FILTER_NAME;
 
+	/**
+	 * 向容器中注册一个 Filter
+	 *
+	 * @param securityProperties spring.security 的属性
+	 * @return RegistrationBean 动态注册 Filter，而且这是一种特殊的委托类型
+	 */
 	@Bean
 	@ConditionalOnBean(name = DEFAULT_FILTER_NAME)
 	public DelegatingFilterProxyRegistrationBean securityFilterChainRegistration(
 			SecurityProperties securityProperties) {
+
+		// Spring Boot 提供了两种方式动态注册
+		// 用的比较多的是 FilterRegistrationBean
+
+		// 这里使用 DelegatingFilterProxyRegistrationBean 方式，构造器先传入了一个名字，就是 beanName
 		DelegatingFilterProxyRegistrationBean registration = new DelegatingFilterProxyRegistrationBean(
 				DEFAULT_FILTER_NAME);
+
+		// 设置 order 默认是 -100
+		// 这个值很有考虑，默认 Filter order 是 0
+		// 这里设置为 0 - 100，将会比一般 filter 更早执行
+		// 所以，即使你向 FilterChain 添加了 Filter，同时 Filter 也在 Tomcat filters 里，也不会混乱
 		registration.setOrder(securityProperties.getFilter().getOrder());
+
+		// 设置 dispatcherTypes
 		registration.setDispatcherTypes(getDispatcherTypes(securityProperties));
 		return registration;
 	}
 
+	/**
+	 * 从 Security 属性中解析出 DispatcherType
+	 */
 	private EnumSet<DispatcherType> getDispatcherTypes(SecurityProperties securityProperties) {
+		// 没有设置 dispatcher type，返回 null
 		if (securityProperties.getFilter().getDispatcherTypes() == null) {
 			return null;
 		}
+
+		// 遍历 DispatcherTypes，每一项也是一个枚举，但是不是 Servlet 枚举，而是 Spring 自己定义的枚举
+		// 通过 name() + valueOf() 转换为 Servlet 规范枚举
 		return securityProperties.getFilter()
-			.getDispatcherTypes()
-			.stream()
-			.map((type) -> DispatcherType.valueOf(type.name()))
-			.collect(Collectors.toCollection(() -> EnumSet.noneOf(DispatcherType.class)));
+				.getDispatcherTypes()
+				.stream()
+				.map((type) -> DispatcherType.valueOf(type.name()))
+				// 创建一个 EnumSet 空集合，后面应该会向这个集合填充枚举
+				.collect(Collectors.toCollection(() -> EnumSet.noneOf(DispatcherType.class)));
 	}
 
 }
