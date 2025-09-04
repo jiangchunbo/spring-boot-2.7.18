@@ -271,8 +271,7 @@ public class SpringApplication {
 		this.webApplicationType = WebApplicationType.deduceFromClasspath();
 
 		// 从 spring.factories 获取 BootstrapRegistryInitializer
-		this.bootstrapRegistryInitializers = new ArrayList<>(
-				getSpringFactoriesInstances(BootstrapRegistryInitializer.class));
+		this.bootstrapRegistryInitializers = new ArrayList<>(getSpringFactoriesInstances(BootstrapRegistryInitializer.class));
 
 		// 从 spring.factories 获取 ApplicationContextInitializer，prepareContext 将会调用它们
 		// 其实也有不少默认的 ApplicationContextInitializer
@@ -401,8 +400,7 @@ public class SpringApplication {
 		return bootstrapContext;
 	}
 
-	private ConfigurableEnvironment prepareEnvironment(SpringApplicationRunListeners listeners,
-													   DefaultBootstrapContext bootstrapContext, ApplicationArguments applicationArguments) {
+	private ConfigurableEnvironment prepareEnvironment(SpringApplicationRunListeners listeners, DefaultBootstrapContext bootstrapContext, ApplicationArguments applicationArguments) {
 		// Create and configure the environment
 		// 创建 Environment 如果不存在，基本都不存在，除非已经提前调用了 setEnvironment
 		ConfigurableEnvironment environment = getOrCreateEnvironment();
@@ -416,8 +414,7 @@ public class SpringApplication {
 		// 发布事件
 		listeners.environmentPrepared(bootstrapContext, environment);
 		DefaultPropertiesPropertySource.moveToEnd(environment);
-		Assert.state(!environment.containsProperty("spring.main.environment-prefix"),
-				"Environment prefix cannot be set via properties.");
+		Assert.state(!environment.containsProperty("spring.main.environment-prefix"), "Environment prefix cannot be set via properties.");
 
 		// 绑定到 SpringApplication
 		// 其实就是依靠 Binder 将属性附加到这里
@@ -431,8 +428,7 @@ public class SpringApplication {
 	}
 
 	private Class<? extends ConfigurableEnvironment> deduceEnvironmentClass() {
-		Class<? extends ConfigurableEnvironment> environmentType = this.applicationContextFactory
-				.getEnvironmentType(this.webApplicationType);
+		Class<? extends ConfigurableEnvironment> environmentType = this.applicationContextFactory.getEnvironmentType(this.webApplicationType);
 		if (environmentType == null && this.applicationContextFactory != ApplicationContextFactory.DEFAULT) {
 			environmentType = ApplicationContextFactory.DEFAULT.getEnvironmentType(this.webApplicationType);
 		}
@@ -442,9 +438,7 @@ public class SpringApplication {
 		return environmentType;
 	}
 
-	private void prepareContext(DefaultBootstrapContext bootstrapContext, ConfigurableApplicationContext context,
-								ConfigurableEnvironment environment, SpringApplicationRunListeners listeners,
-								ApplicationArguments applicationArguments, Banner printedBanner) {
+	private void prepareContext(DefaultBootstrapContext bootstrapContext, ConfigurableApplicationContext context, ConfigurableEnvironment environment, SpringApplicationRunListeners listeners, ApplicationArguments applicationArguments, Banner printedBanner) {
 
 		// 设置 Environment （之前已经准备好了 Environment）
 		context.setEnvironment(environment);
@@ -477,14 +471,12 @@ public class SpringApplication {
 			beanFactory.registerSingleton("springBootBanner", printedBanner);
 		}
 
-
 		if (beanFactory instanceof AbstractAutowireCapableBeanFactory) {
 			// 是否允许循环依赖
 			((AbstractAutowireCapableBeanFactory) beanFactory).setAllowCircularReferences(this.allowCircularReferences);
 			if (beanFactory instanceof DefaultListableBeanFactory) {
 				// 是否允许 bean 覆盖
-				((DefaultListableBeanFactory) beanFactory)
-						.setAllowBeanDefinitionOverriding(this.allowBeanDefinitionOverriding);
+				((DefaultListableBeanFactory) beanFactory).setAllowBeanDefinitionOverriding(this.allowBeanDefinitionOverriding);
 			}
 		}
 		if (this.lazyInitialization) {
@@ -510,8 +502,7 @@ public class SpringApplication {
 	}
 
 	private void configureHeadlessProperty() {
-		System.setProperty(SYSTEM_PROPERTY_JAVA_AWT_HEADLESS,
-				System.getProperty(SYSTEM_PROPERTY_JAVA_AWT_HEADLESS, Boolean.toString(this.headless)));
+		System.setProperty(SYSTEM_PROPERTY_JAVA_AWT_HEADLESS, System.getProperty(SYSTEM_PROPERTY_JAVA_AWT_HEADLESS, Boolean.toString(this.headless)));
 	}
 
 	private SpringApplicationRunListeners getRunListeners(String[] args) {
@@ -521,9 +512,7 @@ public class SpringApplication {
 
 		// 实例化 SpringApplicationRunListener
 		// 传入的参数就是 SpringApplication 也就是 this，还有一个 args
-		return new SpringApplicationRunListeners(logger,
-				getSpringFactoriesInstances(SpringApplicationRunListener.class, types, this, args),
-				this.applicationStartup);
+		return new SpringApplicationRunListeners(logger, getSpringFactoriesInstances(SpringApplicationRunListener.class, types, this, args), this.applicationStartup);
 	}
 
 	private <T> Collection<T> getSpringFactoriesInstances(Class<T> type) {
@@ -540,8 +529,7 @@ public class SpringApplication {
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T> List<T> createSpringFactoriesInstances(Class<T> type, Class<?>[] parameterTypes,
-													   ClassLoader classLoader, Object[] args, Set<String> names) {
+	private <T> List<T> createSpringFactoriesInstances(Class<T> type, Class<?>[] parameterTypes, ClassLoader classLoader, Object[] args, Set<String> names) {
 		List<T> instances = new ArrayList<>(names.size());
 		for (String name : names) {
 			try {
@@ -648,8 +636,7 @@ public class SpringApplication {
 		// 这里意思就是说，有一个属性 spring.beaninfo.ignore
 		// 如果 Java 的系统属性没有找到，就从 environment 里面取出来，放进去
 		if (System.getProperty(CachedIntrospectionResults.IGNORE_BEANINFO_PROPERTY_NAME) == null) {
-			Boolean ignore = environment.getProperty(CachedIntrospectionResults.IGNORE_BEANINFO_PROPERTY_NAME,
-					Boolean.class, Boolean.TRUE);
+			Boolean ignore = environment.getProperty(CachedIntrospectionResults.IGNORE_BEANINFO_PROPERTY_NAME, Boolean.class, Boolean.TRUE);
 			System.setProperty(CachedIntrospectionResults.IGNORE_BEANINFO_PROPERTY_NAME, ignore.toString());
 		}
 	}
@@ -674,8 +661,7 @@ public class SpringApplication {
 		}
 
 		// 资源加载器，因为有可能需要加载用户自定义的 banner.txt
-		ResourceLoader resourceLoader = (this.resourceLoader != null) ? this.resourceLoader
-				: new DefaultResourceLoader(null);
+		ResourceLoader resourceLoader = (this.resourceLoader != null) ? this.resourceLoader : new DefaultResourceLoader(null);
 		SpringApplicationBannerPrinter bannerPrinter = new SpringApplicationBannerPrinter(resourceLoader, this.banner);
 
 		// 日志打印
@@ -707,8 +693,7 @@ public class SpringApplication {
 	 */
 	protected void postProcessApplicationContext(ConfigurableApplicationContext context) {
 		if (this.beanNameGenerator != null) {
-			context.getBeanFactory()
-					.registerSingleton(AnnotationConfigUtils.CONFIGURATION_BEAN_NAME_GENERATOR, this.beanNameGenerator);
+			context.getBeanFactory().registerSingleton(AnnotationConfigUtils.CONFIGURATION_BEAN_NAME_GENERATOR, this.beanNameGenerator);
 		}
 		if (this.resourceLoader != null) {
 			if (context instanceof GenericApplicationContext) {
@@ -733,8 +718,7 @@ public class SpringApplication {
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	protected void applyInitializers(ConfigurableApplicationContext context) {
 		for (ApplicationContextInitializer initializer : getInitializers()) {
-			Class<?> requiredType = GenericTypeResolver.resolveTypeArgument(initializer.getClass(),
-					ApplicationContextInitializer.class);
+			Class<?> requiredType = GenericTypeResolver.resolveTypeArgument(initializer.getClass(), ApplicationContextInitializer.class);
 			Assert.isInstanceOf(requiredType, context, "Unable to call initializer.");
 			initializer.initialize(context);
 		}
@@ -763,13 +747,10 @@ public class SpringApplication {
 			List<String> activeProfiles = quoteProfiles(context.getEnvironment().getActiveProfiles());
 			if (ObjectUtils.isEmpty(activeProfiles)) {
 				List<String> defaultProfiles = quoteProfiles(context.getEnvironment().getDefaultProfiles());
-				String message = String.format("%s default %s: ", defaultProfiles.size(),
-						(defaultProfiles.size() <= 1) ? "profile" : "profiles");
-				log.info("No active profile set, falling back to " + message
-						+ StringUtils.collectionToDelimitedString(defaultProfiles, ", "));
+				String message = String.format("%s default %s: ", defaultProfiles.size(), (defaultProfiles.size() <= 1) ? "profile" : "profiles");
+				log.info("No active profile set, falling back to " + message + StringUtils.collectionToDelimitedString(defaultProfiles, ", "));
 			} else {
-				String message = (activeProfiles.size() == 1) ? "1 profile is active: "
-						: activeProfiles.size() + " profiles are active: ";
+				String message = (activeProfiles.size() == 1) ? "1 profile is active: " : activeProfiles.size() + " profiles are active: ";
 				log.info("The following " + message + StringUtils.collectionToDelimitedString(activeProfiles, ", "));
 			}
 		}
@@ -919,8 +900,7 @@ public class SpringApplication {
 		}
 	}
 
-	private void handleRunFailure(ConfigurableApplicationContext context, Throwable exception,
-								  SpringApplicationRunListeners listeners) {
+	private void handleRunFailure(ConfigurableApplicationContext context, Throwable exception, SpringApplicationRunListeners listeners) {
 		try {
 			try {
 				handleExitCode(context, exception);
@@ -942,8 +922,7 @@ public class SpringApplication {
 
 	private Collection<SpringBootExceptionReporter> getExceptionReporters(ConfigurableApplicationContext context) {
 		try {
-			return getSpringFactoriesInstances(SpringBootExceptionReporter.class,
-					new Class<?>[]{ConfigurableApplicationContext.class}, context);
+			return getSpringFactoriesInstances(SpringBootExceptionReporter.class, new Class<?>[]{ConfigurableApplicationContext.class}, context);
 		} catch (Throwable ex) {
 			return Collections.emptyList();
 		}
@@ -1028,8 +1007,7 @@ public class SpringApplication {
 	}
 
 	private boolean isMainThread(Thread currentThread) {
-		return ("main".equals(currentThread.getName()) || "restartedMain".equals(currentThread.getName()))
-				&& "main".equals(currentThread.getThreadGroup().getName());
+		return ("main".equals(currentThread.getName()) || "restartedMain".equals(currentThread.getName())) && "main".equals(currentThread.getThreadGroup().getName());
 	}
 
 	/**
@@ -1367,8 +1345,7 @@ public class SpringApplication {
 	 * @since 2.4.0
 	 */
 	public void setApplicationContextFactory(ApplicationContextFactory applicationContextFactory) {
-		this.applicationContextFactory = (applicationContextFactory != null) ? applicationContextFactory
-				: ApplicationContextFactory.DEFAULT;
+		this.applicationContextFactory = (applicationContextFactory != null) ? applicationContextFactory : ApplicationContextFactory.DEFAULT;
 	}
 
 	/**
@@ -1466,9 +1443,15 @@ public class SpringApplication {
 	/**
 	 * Static helper that can be used to run a {@link SpringApplication} from the
 	 * specified source using default settings.
+	 * <p>
+	 * 静态助手方法，用于从指定的 source 运行 SpringApplication >>> 使用默认的设置
+	 * <p>
+	 * 这个方法也是经典的快速开始方法
 	 *
 	 * @param primarySource the primary source to load
+	 *                      主要加载的源，基本就是启动类
 	 * @param args          the application arguments (usually passed from a Java main method)
+	 *                      应用参数，通常传递的就是 java main 方法的参数
 	 * @return the running {@link ApplicationContext}
 	 */
 	public static ConfigurableApplicationContext run(Class<?> primarySource, String... args) {
@@ -1484,6 +1467,7 @@ public class SpringApplication {
 	 * @return the running {@link ApplicationContext}
 	 */
 	public static ConfigurableApplicationContext run(Class<?>[] primarySources, String[] args) {
+		// 创建了一个 SpringApplication 对象，传入 primarySources 参数，并使用 args 运行
 		return new SpringApplication(primarySources).run(args);
 	}
 
