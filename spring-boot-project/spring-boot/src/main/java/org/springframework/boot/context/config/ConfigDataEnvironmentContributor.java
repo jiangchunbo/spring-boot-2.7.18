@@ -54,7 +54,7 @@ import org.springframework.util.CollectionUtils;
 class ConfigDataEnvironmentContributor implements Iterable<ConfigDataEnvironmentContributor> {
 
 	private static final ConfigData.Options EMPTY_LOCATION_OPTIONS = ConfigData.Options
-		.of(ConfigData.Option.IGNORE_IMPORTS);
+			.of(ConfigData.Option.IGNORE_IMPORTS);
 
 	private final ConfigDataLocation location;
 
@@ -76,22 +76,23 @@ class ConfigDataEnvironmentContributor implements Iterable<ConfigDataEnvironment
 
 	/**
 	 * Create a new {@link ConfigDataEnvironmentContributor} instance.
-	 * @param kind the contributor kind
-	 * @param location the location of this contributor
-	 * @param resource the resource that contributed the data or {@code null}
-	 * @param fromProfileSpecificImport if the contributor is from a profile specific
-	 * import
-	 * @param propertySource the property source for the data or {@code null}
+	 *
+	 * @param kind                        the contributor kind
+	 * @param location                    the location of this contributor
+	 * @param resource                    the resource that contributed the data or {@code null}
+	 * @param fromProfileSpecificImport   if the contributor is from a profile specific
+	 *                                    import
+	 * @param propertySource              the property source for the data or {@code null}
 	 * @param configurationPropertySource the configuration property source for the data
-	 * or {@code null}
-	 * @param properties the config data properties or {@code null}
-	 * @param configDataOptions any config data options that should apply
-	 * @param children the children of this contributor at each {@link ImportPhase}
+	 *                                    or {@code null}
+	 * @param properties                  the config data properties or {@code null}
+	 * @param configDataOptions           any config data options that should apply
+	 * @param children                    the children of this contributor at each {@link ImportPhase}
 	 */
 	ConfigDataEnvironmentContributor(Kind kind, ConfigDataLocation location, ConfigDataResource resource,
-			boolean fromProfileSpecificImport, PropertySource<?> propertySource,
-			ConfigurationPropertySource configurationPropertySource, ConfigDataProperties properties,
-			ConfigData.Options configDataOptions, Map<ImportPhase, List<ConfigDataEnvironmentContributor>> children) {
+									 boolean fromProfileSpecificImport, PropertySource<?> propertySource,
+									 ConfigurationPropertySource configurationPropertySource, ConfigDataProperties properties,
+									 ConfigData.Options configDataOptions, Map<ImportPhase, List<ConfigDataEnvironmentContributor>> children) {
 		this.kind = kind;
 		this.location = location;
 		this.resource = resource;
@@ -105,6 +106,7 @@ class ConfigDataEnvironmentContributor implements Iterable<ConfigDataEnvironment
 
 	/**
 	 * Return the contributor kind.
+	 *
 	 * @return the kind of contributor
 	 */
 	Kind getKind() {
@@ -117,10 +119,14 @@ class ConfigDataEnvironmentContributor implements Iterable<ConfigDataEnvironment
 
 	/**
 	 * Return if this contributor is currently active.
+	 *
+	 * 结合节点类型与 active 上下文，判断该配置 Contributor 当前是否应该被 Spring Boot 视为有效
+	 *
 	 * @param activationContext the activation context
 	 * @return if the contributor is active
 	 */
 	boolean isActive(ConfigDataActivationContext activationContext) {
+		// 如果 kind 是 UNBOUND_IMPORT -> 仅标记了要导入，但尚未真正加载并绑定
 		if (this.kind == Kind.UNBOUND_IMPORT) {
 			return false;
 		}
@@ -129,6 +135,7 @@ class ConfigDataEnvironmentContributor implements Iterable<ConfigDataEnvironment
 
 	/**
 	 * Return the resource that contributed this instance.
+	 *
 	 * @return the resource or {@code null}
 	 */
 	ConfigDataResource getResource() {
@@ -137,6 +144,7 @@ class ConfigDataEnvironmentContributor implements Iterable<ConfigDataEnvironment
 
 	/**
 	 * Return if the contributor is from a profile specific import.
+	 *
 	 * @return if the contributor is profile specific
 	 */
 	boolean isFromProfileSpecificImport() {
@@ -145,6 +153,7 @@ class ConfigDataEnvironmentContributor implements Iterable<ConfigDataEnvironment
 
 	/**
 	 * Return the property source for this contributor.
+	 *
 	 * @return the property source or {@code null}
 	 */
 	PropertySource<?> getPropertySource() {
@@ -153,6 +162,7 @@ class ConfigDataEnvironmentContributor implements Iterable<ConfigDataEnvironment
 
 	/**
 	 * Return the configuration property source for this contributor.
+	 *
 	 * @return the configuration property source or {@code null}
 	 */
 	ConfigurationPropertySource getConfigurationPropertySource() {
@@ -161,6 +171,7 @@ class ConfigDataEnvironmentContributor implements Iterable<ConfigDataEnvironment
 
 	/**
 	 * Return if the contributor has a specific config data option.
+	 *
 	 * @param option the option to check
 	 * @return {@code true} if the option is present
 	 */
@@ -176,6 +187,7 @@ class ConfigDataEnvironmentContributor implements Iterable<ConfigDataEnvironment
 
 	/**
 	 * Return any imports requested by this contributor.
+	 *
 	 * @return the imports
 	 */
 	List<ConfigDataLocation> getImports() {
@@ -185,6 +197,7 @@ class ConfigDataEnvironmentContributor implements Iterable<ConfigDataEnvironment
 	/**
 	 * Return true if this contributor has imports that have not yet been processed in the
 	 * given phase.
+	 *
 	 * @param importPhase the import phase
 	 * @return if there are unprocessed imports
 	 */
@@ -197,6 +210,7 @@ class ConfigDataEnvironmentContributor implements Iterable<ConfigDataEnvironment
 
 	/**
 	 * Return children of this contributor for the given phase.
+	 *
 	 * @param importPhase the import phase
 	 * @return a list of children
 	 */
@@ -207,6 +221,7 @@ class ConfigDataEnvironmentContributor implements Iterable<ConfigDataEnvironment
 	/**
 	 * Returns a {@link Stream} that traverses this contributor and all its children in
 	 * priority order.
+	 *
 	 * @return the stream
 	 */
 	Stream<ConfigDataEnvironmentContributor> stream() {
@@ -216,6 +231,7 @@ class ConfigDataEnvironmentContributor implements Iterable<ConfigDataEnvironment
 	/**
 	 * Returns an {@link Iterator} that traverses this contributor and all its children in
 	 * priority order.
+	 *
 	 * @return the iterator
 	 * @see java.lang.Iterable#iterator()
 	 */
@@ -227,12 +243,13 @@ class ConfigDataEnvironmentContributor implements Iterable<ConfigDataEnvironment
 	/**
 	 * Create a new {@link ConfigDataEnvironmentContributor} with bound
 	 * {@link ConfigDataProperties}.
-	 * @param contributors the contributors used for binding
+	 *
+	 * @param contributors      the contributors used for binding
 	 * @param activationContext the activation context
 	 * @return a new contributor instance
 	 */
 	ConfigDataEnvironmentContributor withBoundProperties(Iterable<ConfigDataEnvironmentContributor> contributors,
-			ConfigDataActivationContext activationContext) {
+														 ConfigDataActivationContext activationContext) {
 		Iterable<ConfigurationPropertySource> sources = Collections.singleton(getConfigurationPropertySource());
 		PlaceholdersResolver placeholdersResolver = new ConfigDataEnvironmentContributorPlaceholdersResolver(
 				contributors, activationContext, this, true);
@@ -250,12 +267,13 @@ class ConfigDataEnvironmentContributor implements Iterable<ConfigDataEnvironment
 	/**
 	 * Create a new {@link ConfigDataEnvironmentContributor} instance with a new set of
 	 * children for the given phase.
+	 *
 	 * @param importPhase the import phase
-	 * @param children the new children
+	 * @param children    the new children
 	 * @return a new contributor instance
 	 */
 	ConfigDataEnvironmentContributor withChildren(ImportPhase importPhase,
-			List<ConfigDataEnvironmentContributor> children) {
+												  List<ConfigDataEnvironmentContributor> children) {
 		Map<ImportPhase, List<ConfigDataEnvironmentContributor>> updatedChildren = new LinkedHashMap<>(this.children);
 		updatedChildren.put(importPhase, children);
 		if (importPhase == ImportPhase.AFTER_PROFILE_ACTIVATION) {
@@ -282,15 +300,14 @@ class ConfigDataEnvironmentContributor implements Iterable<ConfigDataEnvironment
 	}
 
 	private ConfigDataEnvironmentContributor moveProfileSpecificChildren(ConfigDataEnvironmentContributor contributor,
-			List<ConfigDataEnvironmentContributor> removed) {
+																		 List<ConfigDataEnvironmentContributor> removed) {
 		for (ImportPhase importPhase : ImportPhase.values()) {
 			List<ConfigDataEnvironmentContributor> children = contributor.getChildren(importPhase);
 			List<ConfigDataEnvironmentContributor> updatedChildren = new ArrayList<>(children.size());
 			for (ConfigDataEnvironmentContributor child : children) {
 				if (child.hasConfigDataOption(ConfigData.Option.PROFILE_SPECIFIC)) {
 					removed.add(child.withoutConfigDataOption(ConfigData.Option.PROFILE_SPECIFIC));
-				}
-				else {
+				} else {
 					updatedChildren.add(child);
 				}
 			}
@@ -306,8 +323,8 @@ class ConfigDataEnvironmentContributor implements Iterable<ConfigDataEnvironment
 		for (ConfigDataEnvironmentContributor contributor : contributors) {
 			for (ImportPhase importPhase : ImportPhase.values()) {
 				if (contributor.getChildren(importPhase)
-					.stream()
-					.anyMatch((child) -> child.hasConfigDataOption(ConfigData.Option.PROFILE_SPECIFIC))) {
+						.stream()
+						.anyMatch((child) -> child.hasConfigDataOption(ConfigData.Option.PROFILE_SPECIFIC))) {
 					return true;
 				}
 			}
@@ -318,12 +335,13 @@ class ConfigDataEnvironmentContributor implements Iterable<ConfigDataEnvironment
 	/**
 	 * Create a new {@link ConfigDataEnvironmentContributor} instance where an existing
 	 * child is replaced.
-	 * @param existing the existing node that should be replaced
+	 *
+	 * @param existing    the existing node that should be replaced
 	 * @param replacement the replacement node that should be used instead
 	 * @return a new {@link ConfigDataEnvironmentContributor} instance
 	 */
 	ConfigDataEnvironmentContributor withReplacement(ConfigDataEnvironmentContributor existing,
-			ConfigDataEnvironmentContributor replacement) {
+													 ConfigDataEnvironmentContributor replacement) {
 		if (this == existing) {
 			return replacement;
 		}
@@ -370,6 +388,7 @@ class ConfigDataEnvironmentContributor implements Iterable<ConfigDataEnvironment
 
 	/**
 	 * Factory method to create a {@link Kind#ROOT root} contributor.
+	 *
 	 * @param contributors the immediate children of the root
 	 * @return a new {@link ConfigDataEnvironmentContributor} instance
 	 */
@@ -383,6 +402,7 @@ class ConfigDataEnvironmentContributor implements Iterable<ConfigDataEnvironment
 	 * Factory method to create a {@link Kind#INITIAL_IMPORT initial import} contributor.
 	 * This contributor is used to trigger initial imports of additional contributors. It
 	 * does not contribute any properties itself.
+	 *
 	 * @param initialImport the initial import location (with placeholders resolved)
 	 * @return a new {@link ConfigDataEnvironmentContributor} instance
 	 */
@@ -397,6 +417,7 @@ class ConfigDataEnvironmentContributor implements Iterable<ConfigDataEnvironment
 	 * Factory method to create a contributor that wraps an {@link Kind#EXISTING existing}
 	 * property source. The contributor provides access to existing properties, but
 	 * doesn't actively import any additional contributors.
+	 *
 	 * @param propertySource the property source to wrap
 	 * @return a new {@link ConfigDataEnvironmentContributor} instance
 	 */
@@ -409,15 +430,16 @@ class ConfigDataEnvironmentContributor implements Iterable<ConfigDataEnvironment
 	 * Factory method to create an {@link Kind#UNBOUND_IMPORT unbound import} contributor.
 	 * This contributor has been actively imported from another contributor and may itself
 	 * import further contributors later.
-	 * @param location the location of this contributor
-	 * @param resource the config data resource
-	 * @param profileSpecific if the contributor is from a profile specific import
-	 * @param configData the config data
+	 *
+	 * @param location            the location of this contributor
+	 * @param resource            the config data resource
+	 * @param profileSpecific     if the contributor is from a profile specific import
+	 * @param configData          the config data
 	 * @param propertySourceIndex the index of the property source that should be used
 	 * @return a new {@link ConfigDataEnvironmentContributor} instance
 	 */
 	static ConfigDataEnvironmentContributor ofUnboundImport(ConfigDataLocation location, ConfigDataResource resource,
-			boolean profileSpecific, ConfigData configData, int propertySourceIndex) {
+															boolean profileSpecific, ConfigData configData, int propertySourceIndex) {
 		PropertySource<?> propertySource = configData.getPropertySources().get(propertySourceIndex);
 		ConfigData.Options options = configData.getOptions(propertySource);
 		ConfigurationPropertySource configurationPropertySource = ConfigurationPropertySource.from(propertySource);
@@ -427,7 +449,8 @@ class ConfigDataEnvironmentContributor implements Iterable<ConfigDataEnvironment
 
 	/**
 	 * Factory method to create an {@link Kind#EMPTY_LOCATION empty location} contributor.
-	 * @param location the location of this contributor
+	 *
+	 * @param location        the location of this contributor
 	 * @param profileSpecific if the contributor is from a profile specific import
 	 * @return a new {@link ConfigDataEnvironmentContributor} instance
 	 */
@@ -492,6 +515,7 @@ class ConfigDataEnvironmentContributor implements Iterable<ConfigDataEnvironment
 
 		/**
 		 * Return the {@link ImportPhase} based on the given activation context.
+		 *
 		 * @param activationContext the activation context
 		 * @return the import phase
 		 */

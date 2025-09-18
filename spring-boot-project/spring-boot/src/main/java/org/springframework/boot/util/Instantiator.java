@@ -157,9 +157,11 @@ public class Instantiator<T> {
 
 	@SuppressWarnings("unchecked")
 	private T instantiate(Class<?> type) throws Exception {
+		// 简单获取所有构造器，按照参数数量排序
 		Constructor<?>[] constructors = type.getDeclaredConstructors();
 		Arrays.sort(constructors, CONSTRUCTOR_COMPARATOR);
 		for (Constructor<?> constructor : constructors) {
+			// 找到一个参数可以匹配的，调用之
 			Object[] args = getArgs(constructor.getParameterTypes());
 			if (args != null) {
 				ReflectionUtils.makeAccessible(constructor);

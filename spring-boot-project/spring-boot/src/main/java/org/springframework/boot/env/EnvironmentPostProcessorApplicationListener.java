@@ -40,6 +40,9 @@ import org.springframework.core.io.ResourceLoader;
  */
 public class EnvironmentPostProcessorApplicationListener implements SmartApplicationListener, Ordered {
 
+	// @@@@@@@@@@@@@@@
+	//
+
 	/**
 	 * The default order for the processor.
 	 */
@@ -97,6 +100,8 @@ public class EnvironmentPostProcessorApplicationListener implements SmartApplica
 	private void onApplicationEnvironmentPreparedEvent(ApplicationEnvironmentPreparedEvent event) {
 		ConfigurableEnvironment environment = event.getEnvironment();
 		SpringApplication application = event.getSpringApplication();
+
+		// 获取很多用于处理 Environment 的处理器
 		for (EnvironmentPostProcessor postProcessor : getEnvironmentPostProcessors(application.getResourceLoader(),
 				event.getBootstrapContext())) {
 			postProcessor.postProcessEnvironment(environment, application);
@@ -118,6 +123,8 @@ public class EnvironmentPostProcessorApplicationListener implements SmartApplica
 	List<EnvironmentPostProcessor> getEnvironmentPostProcessors(ResourceLoader resourceLoader,
 			ConfigurableBootstrapContext bootstrapContext) {
 		ClassLoader classLoader = (resourceLoader != null) ? resourceLoader.getClassLoader() : null;
+
+		// 通过 postProcessorsFactory 传入 classLoader 得到 EnvironmentPostProcessorsFactory
 		EnvironmentPostProcessorsFactory postProcessorsFactory = this.postProcessorsFactory.apply(classLoader);
 		return postProcessorsFactory.getEnvironmentPostProcessors(this.deferredLogs, bootstrapContext);
 	}

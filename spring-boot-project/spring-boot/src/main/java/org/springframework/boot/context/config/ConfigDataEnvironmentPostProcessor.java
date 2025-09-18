@@ -50,6 +50,11 @@ import org.springframework.util.StringUtils;
  */
 public class ConfigDataEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 
+	// @@@@@@@@@@@@@@@@@@@
+	// 当 EnvironmentPostProcessorApplicationListener 监听到了 ApplicationEnvironmentPreparedEvent 事件之后
+	// 就会寻找所有的 EnvironmentPostProcessor
+	// 其中 ConfigDataEnvironmentPostProcessor [本类] 是最高的
+
 	/**
 	 * The default order for the processor.
 	 */
@@ -99,7 +104,12 @@ public class ConfigDataEnvironmentPostProcessor implements EnvironmentPostProces
 		try {
 			this.logger.trace("Post-processing environment to add config data");
 			resourceLoader = (resourceLoader != null) ? resourceLoader : new DefaultResourceLoader();
-			getConfigDataEnvironment(environment, resourceLoader, additionalProfiles).processAndApply();
+
+			// 总之，得到一个 ConfigDataEnvironment
+			// 然后调用其 process 方法去填充属性
+			getConfigDataEnvironment(environment, resourceLoader, additionalProfiles)
+					// 调用处理
+					.processAndApply();
 		}
 		catch (UseLegacyConfigProcessingException ex) {
 			this.logger.debug(LogMessage.format("Switching to legacy config file processing [%s]",
@@ -173,6 +183,8 @@ public class ConfigDataEnvironmentPostProcessor implements EnvironmentPostProces
 			ConfigurableBootstrapContext bootstrapContext, Collection<String> additionalProfiles) {
 		DeferredLogFactory logFactory = Supplier::get;
 		bootstrapContext = (bootstrapContext != null) ? bootstrapContext : new DefaultBootstrapContext();
+
+		// 创建了一个 ConfigDataEnvironmentPostProcessor 对象
 		ConfigDataEnvironmentPostProcessor postProcessor = new ConfigDataEnvironmentPostProcessor(logFactory,
 				bootstrapContext);
 		postProcessor.postProcessEnvironment(environment, resourceLoader, additionalProfiles);

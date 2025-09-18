@@ -38,13 +38,26 @@ import org.springframework.test.context.ContextConfiguration;
 public class ConfigDataApplicationContextInitializer
 		implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
+	// @@@@@@@@@@@@@@@@@
+	// 某个时机增强 ConfigurableApplicationContext
+
 	@Override
 	public void initialize(ConfigurableApplicationContext applicationContext) {
+		// 获取 Environment
 		ConfigurableEnvironment environment = applicationContext.getEnvironment();
 		RandomValuePropertySource.addToEnvironment(environment);
+
+		// 创建了一个临时 BootstrapContext
 		DefaultBootstrapContext bootstrapContext = new DefaultBootstrapContext();
+
+		// 这个静态方法中会创建一个 ConfigDataEnvironmentPostProcessor
+		// 这个对象用于给 environment 填充属性
 		ConfigDataEnvironmentPostProcessor.applyTo(environment, applicationContext, bootstrapContext);
+
+		// 关闭这个临时的 Context
 		bootstrapContext.close(applicationContext);
+
+		// 将 Default 属性源填充到 end
 		DefaultPropertiesPropertySource.moveToEnd(environment);
 	}
 

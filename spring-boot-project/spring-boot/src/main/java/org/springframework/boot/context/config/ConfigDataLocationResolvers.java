@@ -42,6 +42,9 @@ import org.springframework.core.io.support.SpringFactoriesLoader;
  */
 class ConfigDataLocationResolvers {
 
+	/**
+	 * 所有的解析器。内置三种。
+	 */
 	private final List<ConfigDataLocationResolver<?>> resolvers;
 
 	/**
@@ -102,7 +105,10 @@ class ConfigDataLocationResolvers {
 		if (location == null) {
 			return Collections.emptyList();
 		}
+
+		// 获取所有 ConfigDataLocationResolver
 		for (ConfigDataLocationResolver<?> resolver : getResolvers()) {
+			// 是否能够解析
 			if (resolver.isResolvable(context, location)) {
 				return resolve(resolver, context, location, profiles);
 			}

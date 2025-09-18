@@ -35,11 +35,19 @@ import org.springframework.util.StringUtils;
  */
 public final class ConfigDataLocation implements OriginProvider {
 
+	// @@@@@@@@@@@@@@@@@
+	// 这个类充当配置数据的定位符，你可以类比 URL
+	// 配置数据也有自己的定位方式，定位语法
+	// 例如：classpath:/  file:./config/ consul:
+
 	/**
 	 * Prefix used to indicate that a {@link ConfigDataResource} is optional.
 	 */
 	public static final String OPTIONAL_PREFIX = "optional:";
 
+	/**
+	 * 是否是可选的，也就是非必需的
+	 */
 	private final boolean optional;
 
 	private final String value;

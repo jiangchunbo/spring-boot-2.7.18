@@ -286,7 +286,7 @@ public class SpringApplication {
 
 		// 从 spring.factories 获取 ApplicationListener
 		// 其实也有不少默认的 ApplicationListener
-		// - EnvironmentPostProcessorApplicationListener
+		// - EnvironmentPostProcessorApplicationListener -> 用于处理 Environment 对象
 		// - AnsiOutputApplicationListener
 		// - LoggingApplicationListener
 		// - BackgroundPreinitializer

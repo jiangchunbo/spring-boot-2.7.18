@@ -56,6 +56,11 @@ import org.springframework.core.env.Environment;
 @FunctionalInterface
 public interface EnvironmentPostProcessor {
 
+	// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+	// 这个接口算是一种回调
+	// 能够在某个时机让调用者拿到 environment 进行处理
+
+
 	/**
 	 * Post-process the given {@code environment}.
 	 * @param environment the environment to post-process
