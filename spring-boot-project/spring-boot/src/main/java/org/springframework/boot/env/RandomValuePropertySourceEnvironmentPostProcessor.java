@@ -52,6 +52,7 @@ public class RandomValuePropertySourceEnvironmentPostProcessor implements Enviro
 
 	@Override
 	public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
+		// 操作反转
 		RandomValuePropertySource.addToEnvironment(environment, this.logger);
 	}
 

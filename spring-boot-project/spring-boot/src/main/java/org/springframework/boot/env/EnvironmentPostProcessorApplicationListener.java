@@ -101,7 +101,8 @@ public class EnvironmentPostProcessorApplicationListener implements SmartApplica
 		ConfigurableEnvironment environment = event.getEnvironment();
 		SpringApplication application = event.getSpringApplication();
 
-		// 获取很多用于处理 Environment 的处理器
+		// EnvironmentPostProcessor -> 就是处理 Environment 对象的
+		// >>>> 这里面有好多实现类
 		for (EnvironmentPostProcessor postProcessor : getEnvironmentPostProcessors(application.getResourceLoader(),
 				event.getBootstrapContext())) {
 			postProcessor.postProcessEnvironment(environment, application);

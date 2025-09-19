@@ -94,12 +94,20 @@ public class SpringApplicationJsonEnvironmentPostProcessor implements Environmen
 	public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
 		MutablePropertySources propertySources = environment.getPropertySources();
 		propertySources.stream()
-			.map(JsonPropertyValue::get)
-			.filter(Objects::nonNull)
-			.findFirst()
-			.ifPresent((v) -> processJson(environment, v));
+				// 解析得到一些 JsonPropertyValue 对象
+				.map(JsonPropertyValue::get)
+				// 过滤非空，其实就是过滤存在 json 配置的
+				.filter(Objects::nonNull)
+				// 即使系统属性、环境变量等都配置了 json，也只有第一个被找到的生效
+				.findFirst()
+				.ifPresent((v) -> processJson(environment, v));
 	}
 
+	/**
+	 * 处理 JSON，其实就是解析 JSON 然后包装为一个新的 PropertySource，添加
+	 * @param environment
+	 * @param propertyValue
+	 */
 	private void processJson(ConfigurableEnvironment environment, JsonPropertyValue propertyValue) {
 		JsonParser parser = JsonParserFactory.getJsonParser();
 		Map<String, Object> map = parser.parseMap(propertyValue.getJson());
@@ -110,6 +118,7 @@ public class SpringApplicationJsonEnvironmentPostProcessor implements Environmen
 
 	/**
 	 * Flatten the map keys using period separator.
+	 *
 	 * @param map the map that should be flattened
 	 * @return the flattened map
 	 */
@@ -132,8 +141,7 @@ public class SpringApplicationJsonEnvironmentPostProcessor implements Environmen
 				return;
 			}
 			flatten(name, result, (Map<String, Object>) value);
-		}
-		else if (value instanceof Collection) {
+		} else if (value instanceof Collection) {
 			if (CollectionUtils.isEmpty((Collection<?>) value)) {
 				result.put(name, value);
 				return;
@@ -143,8 +151,7 @@ public class SpringApplicationJsonEnvironmentPostProcessor implements Environmen
 				extract(name + "[" + index + "]", result, object);
 				index++;
 			}
-		}
-		else {
+		} else {
 			result.put(name, value);
 		}
 	}
@@ -154,8 +161,7 @@ public class SpringApplicationJsonEnvironmentPostProcessor implements Environmen
 		String name = findPropertySource(sources);
 		if (sources.contains(name)) {
 			sources.addBefore(name, source);
-		}
-		else {
+		} else {
 			sources.addFirst(source);
 		}
 	}
@@ -163,9 +169,9 @@ public class SpringApplicationJsonEnvironmentPostProcessor implements Environmen
 	private String findPropertySource(MutablePropertySources sources) {
 		if (ClassUtils.isPresent(SERVLET_ENVIRONMENT_CLASS, null)) {
 			PropertySource<?> servletPropertySource = sources.stream()
-				.filter((source) -> SERVLET_ENVIRONMENT_PROPERTY_SOURCES.contains(source.getName()))
-				.findFirst()
-				.orElse(null);
+					.filter((source) -> SERVLET_ENVIRONMENT_PROPERTY_SOURCES.contains(source.getName()))
+					.findFirst()
+					.orElse(null);
 			if (servletPropertySource != null) {
 				return servletPropertySource.getName();
 			}
@@ -191,8 +197,8 @@ public class SpringApplicationJsonEnvironmentPostProcessor implements Environmen
 
 	private static class JsonPropertyValue {
 
-		private static final String[] CANDIDATES = { SPRING_APPLICATION_JSON_PROPERTY,
-				SPRING_APPLICATION_JSON_ENVIRONMENT_VARIABLE };
+		private static final String[] CANDIDATES = {SPRING_APPLICATION_JSON_PROPERTY,
+				SPRING_APPLICATION_JSON_ENVIRONMENT_VARIABLE};
 
 		private final PropertySource<?> propertySource;
 
@@ -215,8 +221,15 @@ public class SpringApplicationJsonEnvironmentPostProcessor implements Environmen
 		}
 
 		static JsonPropertyValue get(PropertySource<?> propertySource) {
+
+			// spring.application.json
+			// SPRING_APPLICATION_JSON
 			for (String candidate : CANDIDATES) {
+
+				// 查找这个值，待会解析为 JSON
 				Object value = propertySource.getProperty(candidate);
+
+				// 检查是否是 string 并且是非空
 				if (value instanceof String && StringUtils.hasLength((String) value)) {
 					return new JsonPropertyValue(propertySource, candidate, (String) value);
 				}

@@ -62,6 +62,10 @@ import org.springframework.util.StringUtils;
  */
 public class RandomValuePropertySource extends PropertySource<Random> {
 
+	// @@@@@@@@@@@@@@
+	// 具有随机性的 PropertySource
+	// 每次获取值都是随机的
+
 	/**
 	 * Name of the random {@link PropertySource}.
 	 */
@@ -81,6 +85,7 @@ public class RandomValuePropertySource extends PropertySource<Random> {
 
 	@Override
 	public Object getProperty(String name) {
+		// 属性必须以 random. 开头
 		if (!name.startsWith(PREFIX)) {
 			return null;
 		}
@@ -146,12 +151,15 @@ public class RandomValuePropertySource extends PropertySource<Random> {
 	}
 
 	static void addToEnvironment(ConfigurableEnvironment environment, Log logger) {
+		// environment -> propertySources -> add
 		MutablePropertySources sources = environment.getPropertySources();
 		PropertySource<?> existing = sources.get(RANDOM_PROPERTY_SOURCE_NAME);
 		if (existing != null) {
 			logger.trace("RandomValuePropertySource already present");
 			return;
 		}
+
+		// 尽量让随机值的优先级非常低
 		RandomValuePropertySource randomSource = new RandomValuePropertySource(RANDOM_PROPERTY_SOURCE_NAME);
 		if (sources.get(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME) != null) {
 			sources.addAfter(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, randomSource);
