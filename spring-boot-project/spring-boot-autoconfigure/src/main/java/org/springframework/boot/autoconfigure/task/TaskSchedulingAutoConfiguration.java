@@ -16,8 +16,6 @@
 
 package org.springframework.boot.autoconfigure.task;
 
-import java.util.concurrent.ScheduledExecutorService;
-
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.LazyInitializationExcludeFilter;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -35,6 +33,8 @@ import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.config.TaskManagementConfigUtils;
 
+import java.util.concurrent.ScheduledExecutorService;
+
 /**
  * {@link EnableAutoConfiguration Auto-configuration} for {@link TaskScheduler}.
  *
@@ -46,9 +46,18 @@ import org.springframework.scheduling.config.TaskManagementConfigUtils;
 @EnableConfigurationProperties(TaskSchedulingProperties.class)
 public class TaskSchedulingAutoConfiguration {
 
+	// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+	// SCHEDULED_ANNOTATION_PROCESSOR_BEAN_NAME 这个东西是什么 -> 只有你写了 @EnabledScheduling 才会导入
+	// ----> 可以处理 bean 里面的 @Scheduled 注解
+
+	/**
+	 * Spring Boot 项目会自动导入 ThreadPoolTaskScheduler (TaskScheduler 实现类)
+	 * <p>
+	 * Scheduled 使用 TaskScheduler 作为底层的执行器
+	 */
 	@Bean
 	@ConditionalOnBean(name = TaskManagementConfigUtils.SCHEDULED_ANNOTATION_PROCESSOR_BEAN_NAME)
-	@ConditionalOnMissingBean({ SchedulingConfigurer.class, TaskScheduler.class, ScheduledExecutorService.class })
+	@ConditionalOnMissingBean({SchedulingConfigurer.class, TaskScheduler.class, ScheduledExecutorService.class})
 	public ThreadPoolTaskScheduler taskScheduler(TaskSchedulerBuilder builder) {
 		return builder.build();
 	}
@@ -62,7 +71,7 @@ public class TaskSchedulingAutoConfiguration {
 	@Bean
 	@ConditionalOnMissingBean
 	public TaskSchedulerBuilder taskSchedulerBuilder(TaskSchedulingProperties properties,
-			ObjectProvider<TaskSchedulerCustomizer> taskSchedulerCustomizers) {
+													 ObjectProvider<TaskSchedulerCustomizer> taskSchedulerCustomizers) {
 		TaskSchedulerBuilder builder = new TaskSchedulerBuilder();
 		builder = builder.poolSize(properties.getPool().getSize());
 		Shutdown shutdown = properties.getShutdown();
