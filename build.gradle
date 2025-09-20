@@ -40,6 +40,10 @@ allprojects {
 	configurations.all {
 		resolutionStrategy.cacheChangingModulesFor 0, "minutes"
 	}
+
+    tasks.withType(Javadoc).configureEach {
+        enabled = false
+    }
 }
 
 tasks.named("checkstyleNohttp").configure {
