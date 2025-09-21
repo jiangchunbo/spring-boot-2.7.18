@@ -54,6 +54,8 @@ public class TaskSchedulingAutoConfiguration {
 	 * Spring Boot 项目会自动导入 ThreadPoolTaskScheduler (TaskScheduler 实现类)
 	 * <p>
 	 * Scheduled 使用 TaskScheduler 作为底层的执行器
+	 * <p>
+	 * 如果你的项目使用 spring session 会导致下面这个 ThreadPoolTaskScheduler 不会自动注入
 	 */
 	@Bean
 	@ConditionalOnBean(name = TaskManagementConfigUtils.SCHEDULED_ANNOTATION_PROCESSOR_BEAN_NAME)
