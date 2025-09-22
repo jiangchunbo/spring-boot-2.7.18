@@ -47,8 +47,11 @@ import org.springframework.core.Ordered;
  */
 public final class LazyInitializationBeanFactoryPostProcessor implements BeanFactoryPostProcessor, Ordered {
 
+	// 这个类用于处理 Bean Factory 后置逻辑。注意：不是 Bean 后置处理！
+
 	@Override
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+		// 从 bean factory 中找到所有的 LazyInitializationExcludeFilter
 		Collection<LazyInitializationExcludeFilter> filters = getFilters(beanFactory);
 		for (String beanName : beanFactory.getBeanDefinitionNames()) {
 			BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
@@ -69,10 +72,14 @@ public final class LazyInitializationBeanFactoryPostProcessor implements BeanFac
 	private void postProcess(ConfigurableListableBeanFactory beanFactory,
 			Collection<LazyInitializationExcludeFilter> filters, String beanName,
 			AbstractBeanDefinition beanDefinition) {
+		// 如果设置了 lazy init，就不再处理了
 		Boolean lazyInit = beanDefinition.getLazyInit();
 		if (lazyInit != null) {
 			return;
 		}
+
+
+		// 检查有没有被排除，如果没有被排除，就要设置 lazy-init
 		Class<?> beanType = getBeanType(beanFactory, beanName);
 		if (!isExcluded(filters, beanName, beanDefinition, beanType)) {
 			beanDefinition.setLazyInit(true);

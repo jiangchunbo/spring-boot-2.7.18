@@ -479,6 +479,8 @@ public class SpringApplication {
 				((DefaultListableBeanFactory) beanFactory).setAllowBeanDefinitionOverriding(this.allowBeanDefinitionOverriding);
 			}
 		}
+
+		// 如果设置了 lazy initialization，那么就添加这个后置处理器，为 bean definition 设置 lazy init
 		if (this.lazyInitialization) {
 			context.addBeanFactoryPostProcessor(new LazyInitializationBeanFactoryPostProcessor());
 		}

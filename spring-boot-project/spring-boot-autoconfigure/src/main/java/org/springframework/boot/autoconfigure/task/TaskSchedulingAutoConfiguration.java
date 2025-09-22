@@ -64,6 +64,12 @@ public class TaskSchedulingAutoConfiguration {
 		return builder.build();
 	}
 
+	/**
+	 * 这个过滤器通常与懒加载相关，用于排除某些 bean 的懒加载行为。就是说，让他不要懒加载。
+	 *
+
+3+9	 * @return LazyInitializationExcludeFilter
+	 */
 	@Bean
 	@ConditionalOnBean(name = TaskManagementConfigUtils.SCHEDULED_ANNOTATION_PROCESSOR_BEAN_NAME)
 	public static LazyInitializationExcludeFilter scheduledBeanLazyInitializationExcludeFilter() {

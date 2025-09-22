@@ -153,7 +153,11 @@ class ConfigDataEnvironment {
 		// 否则，回退到 ConfigDataNotFoundAction.FAIL
 		this.notFoundAction = binder.bind(ON_NOT_FOUND_PROPERTY, ConfigDataNotFoundAction.class)
 				.orElse(ConfigDataNotFoundAction.FAIL);
+
+		// 轻量的 context
 		this.bootstrapContext = bootstrapContext;
+
+		// environment
 		this.environment = environment;
 
 		// 解析器，这个也很重要，能够将 ConfigDataLocation 定位符号，解析成 ConfigDataResource

@@ -41,6 +41,9 @@ import org.springframework.util.ReflectionUtils;
  */
 class SpringApplicationRunListeners {
 
+	// SpringApplicationRunListener 组合器
+
+
 	private final Log log;
 
 	private final List<SpringApplicationRunListener> listeners;
@@ -62,6 +65,12 @@ class SpringApplicationRunListeners {
 					}
 				});
 	}
+
+	// 下面的的方法都是 spring application run 不同阶段的事件
+	// 其实就是遍历所有 listener，然后调用它们不同的回调方法
+
+
+	// --> 说白了，也就一个 spring application run 监听器，就是 EventPublishingRunListener
 
 	void environmentPrepared(ConfigurableBootstrapContext bootstrapContext, ConfigurableEnvironment environment) {
 		doWithListeners("spring.boot.application.environment-prepared",

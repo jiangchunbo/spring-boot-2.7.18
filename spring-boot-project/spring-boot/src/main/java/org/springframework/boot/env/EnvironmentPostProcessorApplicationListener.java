@@ -103,6 +103,10 @@ public class EnvironmentPostProcessorApplicationListener implements SmartApplica
 
 		// EnvironmentPostProcessor -> 就是处理 Environment 对象的
 		// >>>> 这里面有好多实现类
+
+		// 关注传入的 2 个参数：
+		// - ResourceLoader 来自于 Spring Application，一般是 null
+		// - BootstrapContext 短暂的 context，可以存储一些对象进行共享
 		for (EnvironmentPostProcessor postProcessor : getEnvironmentPostProcessors(application.getResourceLoader(),
 				event.getBootstrapContext())) {
 			postProcessor.postProcessEnvironment(environment, application);
