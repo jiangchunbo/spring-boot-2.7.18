@@ -90,20 +90,22 @@ public class ConfigurationPropertiesBindingPostProcessor
 		try {
 			// 使用 binder 将 Environment 属性赋给 bean
 			this.binder.bind(bean);
-		}
-		catch (Exception ex) {
+		} catch (Exception ex) {
 			throw new ConfigurationPropertiesBindException(bean, ex);
 		}
 	}
 
 	private boolean hasBoundValueObject(String beanName) {
 		return this.registry.containsBeanDefinition(beanName) && BindMethod.VALUE_OBJECT
-			.equals(this.registry.getBeanDefinition(beanName).getAttribute(BindMethod.class.getName()));
+				.equals(this.registry.getBeanDefinition(beanName).getAttribute(BindMethod.class.getName()));
 	}
 
 	/**
 	 * Register a {@link ConfigurationPropertiesBindingPostProcessor} bean if one is not
 	 * already registered.
+	 *
+	 * 向 bean factory 注册 ConfigurationPropertiesBindingPostProcessor
+	 *
 	 * @param registry the bean definition registry
 	 * @since 2.2.0
 	 */
@@ -114,8 +116,8 @@ public class ConfigurationPropertiesBindingPostProcessor
 
 		if (!registry.containsBeanDefinition(BEAN_NAME)) {
 			BeanDefinition definition = BeanDefinitionBuilder
-				.rootBeanDefinition(ConfigurationPropertiesBindingPostProcessor.class)
-				.getBeanDefinition();
+					.rootBeanDefinition(ConfigurationPropertiesBindingPostProcessor.class)
+					.getBeanDefinition();
 			definition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			registry.registerBeanDefinition(BEAN_NAME, definition);
 		}

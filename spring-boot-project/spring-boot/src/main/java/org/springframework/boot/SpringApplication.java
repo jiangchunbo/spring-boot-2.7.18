@@ -335,12 +335,12 @@ public class SpringApplication {
 		ConfigurableApplicationContext context = null;
 		configureHeadlessProperty();
 
-		// 这是一个聚集了所有 SpringApplicationRunListener 监听器的集合体
-		// 一般只提供了一个 EventPublishingRunListener，所以就 1 个元素
+		// 实例化所有的 SpringApplicationRunListener 并组合为 SpringApplicationRunListeners
 		SpringApplicationRunListeners listeners = getRunListeners(args);
 
-		// starting 正在启动事件，传入的是之前从 StackTrace 推断出来的主类
+		// 📢 发布 SpringApplication run -> starting 事件
 		listeners.starting(bootstrapContext, this.mainApplicationClass);
+
 		try {
 			// 程序传入的 args，而且开发者也要继续传进来（如果没有传，就拿不到），包装成应用参数
 			ApplicationArguments applicationArguments = new DefaultApplicationArguments(args);
@@ -375,7 +375,7 @@ public class SpringApplication {
 				new StartupInfoLogger(this.mainApplicationClass).logStarted(getApplicationLog(), timeTakenToStartup);
 			}
 
-			// started 事件
+			// 📢 spring boot run -> started
 			listeners.started(context, timeTakenToStartup);
 
 			// 调用 Runners
@@ -411,8 +411,9 @@ public class SpringApplication {
 		// 附着到第一个
 		ConfigurationPropertySources.attach(environment);
 
-		// 发布事件
+		// 📢 spring application run -> environmentPrepared
 		listeners.environmentPrepared(bootstrapContext, environment);
+
 		DefaultPropertiesPropertySource.moveToEnd(environment);
 		Assert.state(!environment.containsProperty("spring.main.environment-prefix"), "Environment prefix cannot be set via properties.");
 
@@ -449,7 +450,7 @@ public class SpringApplication {
 		// ApplicationContextInitializer 全都调用一遍
 		applyInitializers(context);
 
-		// 发布事件
+		// 📢 spring application run -> contextPrepared
 		listeners.contextPrepared(context);
 
 		// 关闭 BootstrapContext
@@ -492,7 +493,7 @@ public class SpringApplication {
 		Assert.notEmpty(sources, "Sources must not be empty");
 		load(context, sources.toArray(new Object[0]));
 
-		// 发布事件
+		// 📢 spring boot run -> contextLoaded
 		listeners.contextLoaded(context);
 	}
 
@@ -508,12 +509,11 @@ public class SpringApplication {
 	}
 
 	private SpringApplicationRunListeners getRunListeners(String[] args) {
-		// 方法参数，因为接下来要创建 SpringApplicationRunListener 的实例对象，但是用什么构造器呢？
-		// 要用具有这两个参数的构造器
+		// 准备构造函数的参数
 		Class<?>[] types = new Class<?>[]{SpringApplication.class, String[].class};
 
-		// 实例化 SpringApplicationRunListener
-		// 传入的参数就是 SpringApplication 也就是 this，还有一个 args
+		// 从 spring.factories 获取所有 SpringApplicationRunListener 并实例化
+		// 包装为 SpringApplicationRunListeners
 		return new SpringApplicationRunListeners(logger, getSpringFactoriesInstances(SpringApplicationRunListener.class, types, this, args), this.applicationStartup);
 	}
 

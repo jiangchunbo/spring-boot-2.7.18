@@ -51,11 +51,16 @@ public final class LazyInitializationBeanFactoryPostProcessor implements BeanFac
 
 	@Override
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-		// 从 bean factory 中找到所有的 LazyInitializationExcludeFilter
+		// 从 BeanFactory 中找到所有的 LazyInitializationExcludeFilter
 		Collection<LazyInitializationExcludeFilter> filters = getFilters(beanFactory);
 		for (String beanName : beanFactory.getBeanDefinitionNames()) {
+
+			// 获取 BeanDefinition
 			BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
+
 			if (beanDefinition instanceof AbstractBeanDefinition) {
+
+				// 处理 lazy init
 				postProcess(beanFactory, filters, beanName, (AbstractBeanDefinition) beanDefinition);
 			}
 		}
@@ -63,9 +68,14 @@ public final class LazyInitializationBeanFactoryPostProcessor implements BeanFac
 
 	private Collection<LazyInitializationExcludeFilter> getFilters(ConfigurableListableBeanFactory beanFactory) {
 		// Take care not to force the eager init of factory beans when getting filters
+
+		// 1. 根据类型寻找并实例化 LazyInitializationExcludeFilter
 		ArrayList<LazyInitializationExcludeFilter> filters = new ArrayList<>(
 				beanFactory.getBeansOfType(LazyInitializationExcludeFilter.class, false, false).values());
+
+		// 2. 额外添加一个特殊的 LazyInitializationExcludeFilter，允许 SmartInitializingSingleton
 		filters.add(LazyInitializationExcludeFilter.forBeanTypes(SmartInitializingSingleton.class));
+
 		return filters;
 	}
 
@@ -77,7 +87,6 @@ public final class LazyInitializationBeanFactoryPostProcessor implements BeanFac
 		if (lazyInit != null) {
 			return;
 		}
-
 
 		// 检查有没有被排除，如果没有被排除，就要设置 lazy-init
 		Class<?> beanType = getBeanType(beanFactory, beanName);

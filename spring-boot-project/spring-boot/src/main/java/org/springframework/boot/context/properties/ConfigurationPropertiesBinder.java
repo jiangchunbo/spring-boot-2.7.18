@@ -176,8 +176,8 @@ class ConfigurationPropertiesBinder {
 
 	private List<ConfigurationPropertiesBindHandlerAdvisor> getBindHandlerAdvisors() {
 		return this.applicationContext.getBeanProvider(ConfigurationPropertiesBindHandlerAdvisor.class)
-			.orderedStream()
-			.collect(Collectors.toList());
+				.orderedStream()
+				.collect(Collectors.toList());
 	}
 
 	private Binder getBinder() {
@@ -208,21 +208,26 @@ class ConfigurationPropertiesBinder {
 		return null;
 	}
 
+	/**
+	 * 注册一个 bean definition ConfigurationPropertiesBinder
+	 *
+	 * @param registry BeanDefinitionRegistry
+	 */
 	static void register(BeanDefinitionRegistry registry) {
 		if (!registry.containsBeanDefinition(FACTORY_BEAN_NAME)) {
 			BeanDefinition definition = BeanDefinitionBuilder
-				.rootBeanDefinition(ConfigurationPropertiesBinder.Factory.class)
-				.getBeanDefinition();
+					.rootBeanDefinition(ConfigurationPropertiesBinder.Factory.class)
+					.getBeanDefinition();
 			definition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			registry.registerBeanDefinition(ConfigurationPropertiesBinder.FACTORY_BEAN_NAME, definition);
 		}
 		if (!registry.containsBeanDefinition(BEAN_NAME)) {
 			BeanDefinition definition = BeanDefinitionBuilder
-				.rootBeanDefinition(ConfigurationPropertiesBinder.class,
-						() -> ((BeanFactory) registry)
-							.getBean(FACTORY_BEAN_NAME, ConfigurationPropertiesBinder.Factory.class)
-							.create())
-				.getBeanDefinition();
+					.rootBeanDefinition(ConfigurationPropertiesBinder.class,
+							() -> ((BeanFactory) registry)
+									.getBean(FACTORY_BEAN_NAME, ConfigurationPropertiesBinder.Factory.class)
+									.create())
+					.getBeanDefinition();
 			definition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			registry.registerBeanDefinition(ConfigurationPropertiesBinder.BEAN_NAME, definition);
 		}

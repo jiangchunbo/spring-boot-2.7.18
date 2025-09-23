@@ -43,6 +43,7 @@ class EnableConfigurationPropertiesRegistrar implements ImportBeanDefinitionRegi
 
 	@Override
 	public void registerBeanDefinitions(AnnotationMetadata metadata, BeanDefinitionRegistry registry) {
+		// 注册一些 bean 包括后置处理器
 		registerInfrastructureBeans(registry);
 		registerMethodValidationExcludeFilter(registry);
 		ConfigurationPropertiesBeanRegistrar beanRegistrar = new ConfigurationPropertiesBeanRegistrar(registry);
@@ -66,7 +67,11 @@ class EnableConfigurationPropertiesRegistrar implements ImportBeanDefinitionRegi
 	}
 
 	static void registerInfrastructureBeans(BeanDefinitionRegistry registry) {
+		// 注册 ConfigurationPropertiesBindingPostProcessor
+		// 注册 ConfigurationPropertiesBinder
 		ConfigurationPropertiesBindingPostProcessor.register(registry);
+
+		// 注册 BoundConfigurationProperties
 		BoundConfigurationProperties.register(registry);
 	}
 
