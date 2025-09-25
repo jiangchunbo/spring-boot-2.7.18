@@ -50,6 +50,7 @@ public class BoundConfigurationProperties {
 
 	/**
 	 * Get the configuration property bound to the given name.
+	 *
 	 * @param name the property name
 	 * @return the bound property or {@code null}
 	 */
@@ -59,6 +60,7 @@ public class BoundConfigurationProperties {
 
 	/**
 	 * Get all bound properties.
+	 *
 	 * @return a map of all bound properties
 	 */
 	public Map<ConfigurationPropertyName, ConfigurationProperty> getAll() {
@@ -68,6 +70,9 @@ public class BoundConfigurationProperties {
 	/**
 	 * Return the {@link BoundConfigurationProperties} from the given
 	 * {@link ApplicationContext} if it is available.
+	 * <p>
+	 * 一个静态工具类，尝试从容器中获取 BoundConfigurationProperties
+	 *
 	 * @param context the context to search
 	 * @return a {@link BoundConfigurationProperties} or {@code null}
 	 */
@@ -82,8 +87,8 @@ public class BoundConfigurationProperties {
 		Assert.notNull(registry, "Registry must not be null");
 		if (!registry.containsBeanDefinition(BEAN_NAME)) {
 			BeanDefinition definition = BeanDefinitionBuilder
-				.genericBeanDefinition(BoundConfigurationProperties.class, BoundConfigurationProperties::new)
-				.getBeanDefinition();
+					.genericBeanDefinition(BoundConfigurationProperties.class, BoundConfigurationProperties::new)
+					.getBeanDefinition();
 			definition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			registry.registerBeanDefinition(BEAN_NAME, definition);
 		}

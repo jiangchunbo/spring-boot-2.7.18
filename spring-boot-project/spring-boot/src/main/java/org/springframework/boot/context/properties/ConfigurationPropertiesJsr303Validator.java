@@ -32,11 +32,16 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
  */
 final class ConfigurationPropertiesJsr303Validator implements Validator {
 
-	private static final String[] VALIDATOR_CLASSES = { "javax.validation.Validator",
-			"javax.validation.ValidatorFactory", "javax.validation.bootstrap.GenericBootstrap" };
+	private static final String[] VALIDATOR_CLASSES = {"javax.validation.Validator",
+			"javax.validation.ValidatorFactory", "javax.validation.bootstrap.GenericBootstrap"};
 
 	private final Delegate delegate;
 
+	/**
+	 * 唯一的构造方法，其中创建了一个 Delegate 对象
+	 *
+	 * @param applicationContext Spring 应用上下文
+	 */
 	ConfigurationPropertiesJsr303Validator(ApplicationContext applicationContext) {
 		this.delegate = new Delegate(applicationContext);
 	}
@@ -61,6 +66,9 @@ final class ConfigurationPropertiesJsr303Validator implements Validator {
 		return true;
 	}
 
+	/**
+	 * 由于这个类不是一个 bean，因此使用了一些人工方法调用
+	 */
 	private static class Delegate extends LocalValidatorFactoryBean {
 
 		Delegate(ApplicationContext applicationContext) {

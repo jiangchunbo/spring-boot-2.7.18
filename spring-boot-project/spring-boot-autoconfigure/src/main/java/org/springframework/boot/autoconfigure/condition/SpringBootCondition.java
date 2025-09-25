@@ -46,7 +46,8 @@ public abstract class SpringBootCondition implements Condition {
 		String classOrMethodName = getClassOrMethodName(metadata);
 		try {
 
-			// 获得匹配结果
+			// 获得匹配结果 -> 等待子类去实现
+			// ConditionOutcome 是 spring boot 的概念
 			ConditionOutcome outcome = getMatchOutcome(context, metadata);
 
 			// 日志 Trace

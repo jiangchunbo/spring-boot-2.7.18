@@ -64,6 +64,8 @@ public class FilteredMethodValidationPostProcessor extends MethodValidationPostP
 
 		// 获得 parent 提供的 advisor
 		DefaultPointcutAdvisor advisor = (DefaultPointcutAdvisor) this.advisor;
+
+		// 获取 ClassFilter、MethodMatcher -> 因为这里要再加一个切点条件
 		ClassFilter classFilter = advisor.getPointcut().getClassFilter();
 		MethodMatcher methodMatcher = advisor.getPointcut().getMethodMatcher();
 
@@ -73,6 +75,7 @@ public class FilteredMethodValidationPostProcessor extends MethodValidationPostP
 
 	private boolean isIncluded(Class<?> candidate) {
 		for (MethodValidationExcludeFilter exclusionFilter : this.excludeFilters) {
+			// 如果被排除了，就不会切
 			if (exclusionFilter.isExcluded(candidate)) {
 				return false;
 			}

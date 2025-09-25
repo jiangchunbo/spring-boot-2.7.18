@@ -40,9 +40,19 @@ import org.springframework.util.Assert;
 @EnableConfigurationProperties(SessionProperties.class)
 class SessionRepositoryFilterConfiguration {
 
+	// 这个配置类由 Spring Boot 自动配置导入
+	// 用于将 SessionRepositoryFilter 注册到 Servlet 容器中
+
+	/**
+	 * 过滤器注册 bean，用于注册 SessionRepositoryFilter，使用委托惰性
+	 *
+	 * @param sessionProperties 会话属性
+	 * @param beanFactory       BeanFactory 用于寻找 beanName
+	 * @return RegistrationBean
+	 */
 	@Bean
 	DelegatingFilterProxyRegistrationBean sessionRepositoryFilterRegistration(SessionProperties sessionProperties,
-			ListableBeanFactory beanFactory) {
+																			  ListableBeanFactory beanFactory) {
 		// 拿到 SessionRepositoryFilter 的 beanName
 		String[] targetBeanNames = beanFactory.getBeanNamesForType(SessionRepositoryFilter.class, false, false);
 
@@ -64,9 +74,9 @@ class SessionRepositoryFilterConfiguration {
 			return null;
 		}
 		return servletProperties.getFilterDispatcherTypes()
-			.stream()
-			.map((type) -> DispatcherType.valueOf(type.name()))
-			.collect(Collectors.toCollection(() -> EnumSet.noneOf(DispatcherType.class)));
+				.stream()
+				.map((type) -> DispatcherType.valueOf(type.name()))
+				.collect(Collectors.toCollection(() -> EnumSet.noneOf(DispatcherType.class)));
 	}
 
 }

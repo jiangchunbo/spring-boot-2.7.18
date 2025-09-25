@@ -37,9 +37,10 @@ import org.springframework.context.annotation.Import;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-// ImportBeanDefinitionRegistrar
 @Import(EnableConfigurationPropertiesRegistrar.class)
 public @interface EnableConfigurationProperties {
+
+	// 这个注解会通过 ImportBeanDefinitionRegistrar 向容器注册一些组件
 
 	/**
 	 * The bean name of the configuration properties validator.

@@ -45,6 +45,8 @@ class EnableConfigurationPropertiesRegistrar implements ImportBeanDefinitionRegi
 	public void registerBeanDefinitions(AnnotationMetadata metadata, BeanDefinitionRegistry registry) {
 		// 注册一些 bean 包括后置处理器
 		registerInfrastructureBeans(registry);
+
+		// 凡是具有 @ConfigurationProperties 注解的 bean 都不要交给 MethodValidationPostProcessor 处理
 		registerMethodValidationExcludeFilter(registry);
 		ConfigurationPropertiesBeanRegistrar beanRegistrar = new ConfigurationPropertiesBeanRegistrar(registry);
 
@@ -77,11 +79,14 @@ class EnableConfigurationPropertiesRegistrar implements ImportBeanDefinitionRegi
 
 	static void registerMethodValidationExcludeFilter(BeanDefinitionRegistry registry) {
 		if (!registry.containsBeanDefinition(METHOD_VALIDATION_EXCLUDE_FILTER_BEAN_NAME)) {
+
+			// 只是注册了一个类似 Predicate 的对象
 			BeanDefinition definition = BeanDefinitionBuilder
 					.genericBeanDefinition(MethodValidationExcludeFilter.class,
 							() -> MethodValidationExcludeFilter.byAnnotation(ConfigurationProperties.class))
 					.setRole(BeanDefinition.ROLE_INFRASTRUCTURE)
 					.getBeanDefinition();
+
 			registry.registerBeanDefinition(METHOD_VALIDATION_EXCLUDE_FILTER_BEAN_NAME, definition);
 		}
 	}

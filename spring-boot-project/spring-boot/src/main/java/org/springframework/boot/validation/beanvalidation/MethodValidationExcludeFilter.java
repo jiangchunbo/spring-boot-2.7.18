@@ -23,15 +23,18 @@ import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 
 /**
  * A filter for excluding types from method validation.
+ * <p>
+ * 这其实是一个 {@link FunctionalInterface}
  *
  * @author Andy Wilkinson
- * @since 2.4.0
  * @see FilteredMethodValidationPostProcessor
+ * @since 2.4.0
  */
 public interface MethodValidationExcludeFilter {
 
 	/**
 	 * Evaluate whether to exclude the given {@code type} from method validation.
+	 *
 	 * @param type the type to evaluate
 	 * @return {@code true} to exclude the type from method validation, otherwise
 	 * {@code false}.
@@ -42,22 +45,27 @@ public interface MethodValidationExcludeFilter {
 	 * Factory method to create a {@link MethodValidationExcludeFilter} that excludes
 	 * classes by annotation found using an {@link SearchStrategy#INHERITED_ANNOTATIONS
 	 * inherited annotations search strategy}.
+	 * <p>
+	 * 传入一个注解类型，得到一个断言对象 -> 按照 inherited_annotations 规则搜索，判断是否包含这个注解
+	 *
 	 * @param annotationType the annotation to check
 	 * @return a {@link MethodValidationExcludeFilter} instance
 	 */
 	static MethodValidationExcludeFilter byAnnotation(Class<? extends Annotation> annotationType) {
+		// 搜索注解
 		return byAnnotation(annotationType, SearchStrategy.INHERITED_ANNOTATIONS);
 	}
 
 	/**
 	 * Factory method to create a {@link MethodValidationExcludeFilter} that excludes
 	 * classes by annotation found using the given search strategy.
+	 *
 	 * @param annotationType the annotation to check
 	 * @param searchStrategy the annotation search strategy
 	 * @return a {@link MethodValidationExcludeFilter} instance
 	 */
 	static MethodValidationExcludeFilter byAnnotation(Class<? extends Annotation> annotationType,
-			SearchStrategy searchStrategy) {
+													  SearchStrategy searchStrategy) {
 		return (type) -> MergedAnnotations.from(type, searchStrategy).isPresent(annotationType);
 	}
 
