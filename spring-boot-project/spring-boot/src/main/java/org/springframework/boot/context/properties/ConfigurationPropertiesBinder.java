@@ -93,9 +93,16 @@ class ConfigurationPropertiesBinder {
 	 * 绑定属性。似乎是将
 	 */
 	BindResult<?> bind(ConfigurationPropertiesBean propertiesBean) {
+		// 取出其中的 Bindable
 		Bindable<?> target = propertiesBean.asBindTarget();
+
+		// 获取其中的 ConfigurationProperties
 		ConfigurationProperties annotation = propertiesBean.getAnnotation();
+
+		// 得到一个责任链
 		BindHandler bindHandler = getBindHandler(target, annotation);
+
+		// binder -> bind
 		return getBinder().bind(annotation.prefix(), target, bindHandler);
 	}
 
@@ -117,7 +124,7 @@ class ConfigurationPropertiesBinder {
 	}
 
 	private <T> BindHandler getBindHandler(Bindable<T> target, ConfigurationProperties annotation) {
-		// 寻找什么 Validator
+		// 寻找 Validator -> 其实只是给 5 用而已
 		List<Validator> validators = getValidators(target);
 
 		// 构造一个责任链
@@ -163,10 +170,13 @@ class ConfigurationPropertiesBinder {
 
 	private List<Validator> getValidators(Bindable<?> target) {
 		List<Validator> validators = new ArrayList<>(3);
+
+		// 1. 容器中存在的 configurationPropertiesValidator
 		if (this.configurationPropertiesValidator != null) {
 			validators.add(this.configurationPropertiesValidator);
 		}
 
+		// 2. JSR-330 校验器
 		// 如果存在 JSR-330 Validation 依赖，并且 target 对象存在 @Validated 注解
 		if (this.jsr303Present && target.getAnnotation(Validated.class) != null) {
 			validators.add(getJsr303Validator());

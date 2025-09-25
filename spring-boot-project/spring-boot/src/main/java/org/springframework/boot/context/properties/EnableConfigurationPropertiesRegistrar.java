@@ -46,8 +46,9 @@ class EnableConfigurationPropertiesRegistrar implements ImportBeanDefinitionRegi
 		// 注册一些 bean 包括后置处理器
 		registerInfrastructureBeans(registry);
 
-		// 凡是具有 @ConfigurationProperties 注解的 bean 都不要交给 MethodValidationPostProcessor 处理
+		// 2. 注册 ConfigurationPropertiesBeanRegistrar 用于排除 Validation 的校验
 		registerMethodValidationExcludeFilter(registry);
+
 		ConfigurationPropertiesBeanRegistrar beanRegistrar = new ConfigurationPropertiesBeanRegistrar(registry);
 
 

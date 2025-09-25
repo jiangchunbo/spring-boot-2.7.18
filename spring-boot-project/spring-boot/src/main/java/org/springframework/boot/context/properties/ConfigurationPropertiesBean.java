@@ -59,6 +59,8 @@ import org.springframework.validation.annotation.Validated;
  */
 public final class ConfigurationPropertiesBean {
 
+	// 这个对象组合了 ConfigurationProperties 注解、要绑定的对象、Binder 的靶子
+
 	/**
 	 * beanName
 	 */
@@ -281,16 +283,34 @@ public final class ConfigurationPropertiesBean {
 		return propertiesBean;
 	}
 
+	/**
+	 *
+	 * @param name     beanName
+	 * @param instance 有可能传入 null
+	 * @param type     类型
+	 * @param factory  工厂方法 @Bean
+	 * @return
+	 */
 	private static ConfigurationPropertiesBean create(String name, Object instance, Class<?> type, Method factory) {
+		// 获取 ConfigurationProperties 对象，可能来自于方法，或者类
 		ConfigurationProperties annotation = findAnnotation(instance, type, factory, ConfigurationProperties.class);
 		if (annotation == null) {
 			return null;
 		}
+
+		// 获取 Validated 对象，与上面方法是相同的
 		Validated validated = findAnnotation(instance, type, factory, Validated.class);
+
+		// 汇总要处理的注解
 		Annotation[] annotations = (validated != null) ? new Annotation[]{annotation, validated}
 				: new Annotation[]{annotation};
+
+		// 1. factory -> method return type
+		// 2. type -> type
 		ResolvableType bindType = (factory != null) ? ResolvableType.forMethodReturnType(factory)
 				: ResolvableType.forClass(type);
+
+		// 得到一个 Bindable
 		Bindable<Object> bindTarget = Bindable.of(bindType).withAnnotations(annotations);
 		if (instance != null) {
 			bindTarget = bindTarget.withExistingValue(instance);
@@ -304,17 +324,17 @@ public final class ConfigurationPropertiesBean {
 		// 空壳 占位
 		MergedAnnotation<A> annotation = MergedAnnotation.missing();
 
-		// 找工厂方法 @Bean @ConfigurationProperties
+		// 1. 从 Method 找
 		if (factory != null) {
 			annotation = findMergedAnnotation(factory, annotationType);
 		}
 
-		// 去类本身 (取决于 SearchStrategy.TYPE_HIERARCHY)
+		// 2. 从 Class 找
 		if (!annotation.isPresent()) {
 			annotation = findMergedAnnotation(type, annotationType);
 		}
 
-		// 还没找到，但是 instance 是 AOP 代理
+		// 3. 这里我认为是为了解决 JDK 动态代理的情况
 		if (!annotation.isPresent() && AopUtils.isAopProxy(instance)) {
 			annotation = MergedAnnotations.from(AopUtils.getTargetClass(instance), SearchStrategy.TYPE_HIERARCHY)
 					.get(annotationType);
