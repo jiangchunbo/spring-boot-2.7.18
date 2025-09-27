@@ -60,12 +60,16 @@ class SpringConfigurationPropertySources implements Iterable<ConfigurationProper
 	}
 
 	private ConfigurationPropertySource adapt(PropertySource<?> source) {
+		// 从缓存中获取 ConfigurationPropertySource
+		// PropertySource -> PropertySource
 		ConfigurationPropertySource result = this.cache.get(source);
 		// Most PropertySources test equality only using the source name, so we need to
 		// check the actual source hasn't also changed.
 		if (result != null && result.getUnderlyingSource() == source) {
 			return result;
 		}
+
+		// 如果缓存没有，就创建一个 ConfigurationPropertySource
 		result = SpringConfigurationPropertySource.from(source);
 		if (source instanceof OriginLookup) {
 			result = result.withPrefix(((OriginLookup<?>) source).getPrefix());

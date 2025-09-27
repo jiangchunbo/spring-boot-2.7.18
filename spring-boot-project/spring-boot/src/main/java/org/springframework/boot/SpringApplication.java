@@ -190,6 +190,9 @@ public class SpringApplication {
 
 	private boolean logStartupInfo = true;
 
+	/**
+	 * 是否允许添加命令行参数
+	 */
 	private boolean addCommandLineProperties = true;
 
 	private boolean addConversionService = true;
@@ -585,8 +588,10 @@ public class SpringApplication {
 			environment.setConversionService(new ApplicationConversionService());
 		}
 
-		// 配置属性源
+		// 配置 default、commandLine 属性源
 		configurePropertySources(environment, args);
+
+		// 配置 profiles [没有实现]
 		configureProfiles(environment, args);
 	}
 
@@ -603,11 +608,15 @@ public class SpringApplication {
 		if (!CollectionUtils.isEmpty(this.defaultProperties)) {
 			DefaultPropertiesPropertySource.addOrMerge(this.defaultProperties, sources);
 		}
+
+		// addCommandLineProperties: 是否允许添加命令行属性
 		if (this.addCommandLineProperties && args.length > 0) {
 			// commandLineArgs
 			String name = CommandLinePropertySource.COMMAND_LINE_PROPERTY_SOURCE_NAME;
 
-			// 如果包含命令行参数 commandLineArgs 这个属性源，那么获取之，创建一个新的 CompositePropertySource，替换之
+			// 1. 如果包含命令行参数 commandLineArgs 这个属性源，
+			//    那么获取，创建一个新的 CompositePropertySource，组合在一起形成新的属性源
+			// ps: 基本不会出现这个情况
 			if (sources.contains(name)) {
 				PropertySource<?> source = sources.get(name);
 				CompositePropertySource composite = new CompositePropertySource(name);
@@ -616,7 +625,9 @@ public class SpringApplication {
 				composite.addPropertySource(new SimpleCommandLinePropertySource("springApplicationCommandLineArgs", args));
 				composite.addPropertySource(source);
 				sources.replace(name, composite);
-			} else {
+			}
+			// addFirst 表示将 command line 参数添加到开头 [提升优先级]
+			else {
 				sources.addFirst(new SimpleCommandLinePropertySource(args));
 			}
 		}

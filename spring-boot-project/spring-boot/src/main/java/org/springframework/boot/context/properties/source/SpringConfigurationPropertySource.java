@@ -52,10 +52,10 @@ import org.springframework.util.Assert;
  */
 class SpringConfigurationPropertySource implements ConfigurationPropertySource {
 
-	private static final PropertyMapper[] DEFAULT_MAPPERS = { DefaultPropertyMapper.INSTANCE };
+	private static final PropertyMapper[] DEFAULT_MAPPERS = {DefaultPropertyMapper.INSTANCE};
 
-	private static final PropertyMapper[] SYSTEM_ENVIRONMENT_MAPPERS = { SystemEnvironmentPropertyMapper.INSTANCE,
-			DefaultPropertyMapper.INSTANCE };
+	private static final PropertyMapper[] SYSTEM_ENVIRONMENT_MAPPERS = {SystemEnvironmentPropertyMapper.INSTANCE,
+			DefaultPropertyMapper.INSTANCE};
 
 	private final PropertySource<?> propertySource;
 
@@ -63,8 +63,9 @@ class SpringConfigurationPropertySource implements ConfigurationPropertySource {
 
 	/**
 	 * Create a new {@link SpringConfigurationPropertySource} implementation.
+	 *
 	 * @param propertySource the source property source
-	 * @param mappers the property mappers
+	 * @param mappers        the property mappers
 	 */
 	SpringConfigurationPropertySource(PropertySource<?> propertySource, PropertyMapper... mappers) {
 		Assert.notNull(propertySource, "PropertySource must not be null");
@@ -87,13 +88,18 @@ class SpringConfigurationPropertySource implements ConfigurationPropertySource {
 						return ConfigurationProperty.of(this, name, value, origin);
 					}
 				}
-			}
-			catch (Exception ex) {
+			} catch (Exception ex) {
 			}
 		}
 		return null;
 	}
 
+	/**
+	 * 是否包含 name 的后代
+	 *
+	 * @param name the name to check
+	 * @return PRESENT ABSENT UNKNOWN
+	 */
 	@Override
 	public ConfigurationPropertyState containsDescendantOf(ConfigurationPropertyName name) {
 		PropertySource<?> source = getPropertySource();
@@ -109,7 +115,7 @@ class SpringConfigurationPropertySource implements ConfigurationPropertySource {
 	}
 
 	private static ConfigurationPropertyState containsDescendantOfForRandom(String prefix,
-			ConfigurationPropertyName name) {
+																			ConfigurationPropertyName name) {
 		if (name.getNumberOfElements() > 1 && name.getElement(0, Form.DASHED).equals(prefix)) {
 			return ConfigurationPropertyState.PRESENT;
 		}
@@ -137,6 +143,7 @@ class SpringConfigurationPropertySource implements ConfigurationPropertySource {
 	/**
 	 * Create a new {@link SpringConfigurationPropertySource} for the specified
 	 * {@link PropertySource}.
+	 *
 	 * @param source the source Spring {@link PropertySource}
 	 * @return a {@link SpringConfigurationPropertySource} or
 	 * {@link SpringIterableConfigurationPropertySource} instance
@@ -151,9 +158,12 @@ class SpringConfigurationPropertySource implements ConfigurationPropertySource {
 	}
 
 	private static PropertyMapper[] getPropertyMappers(PropertySource<?> source) {
+		// 如果是 System 属性，那么使用一个特殊的 SYSTEM_ENVIRONMENT_MAPPERS
 		if (source instanceof SystemEnvironmentPropertySource && hasSystemEnvironmentName(source)) {
 			return SYSTEM_ENVIRONMENT_MAPPERS;
 		}
+
+		// 否则使用默认的
 		return DEFAULT_MAPPERS;
 	}
 
@@ -169,8 +179,7 @@ class SpringConfigurationPropertySource implements ConfigurationPropertySource {
 			// Check we're not security restricted
 			try {
 				((Map<?, ?>) rootSource.getSource()).size();
-			}
-			catch (UnsupportedOperationException ex) {
+			} catch (UnsupportedOperationException ex) {
 				return false;
 			}
 		}

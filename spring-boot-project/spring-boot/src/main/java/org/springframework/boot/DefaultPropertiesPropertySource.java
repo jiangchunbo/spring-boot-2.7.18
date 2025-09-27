@@ -83,12 +83,16 @@ public class DefaultPropertiesPropertySource extends MapPropertySource {
 		if (!CollectionUtils.isEmpty(source)) {
 			Map<String, Object> resultingSource = new HashMap<>();
 			DefaultPropertiesPropertySource propertySource = new DefaultPropertiesPropertySource(resultingSource);
+
+			// 1. 如果包含 defaultProperties 就需要合并
 			if (sources.contains(NAME)) {
 				mergeIfPossible(source, sources, resultingSource);
 				sources.replace(NAME, propertySource);
 			}
+			// 2. 不存在，就添加到 resultingSource(上面创建的空 Map) 避免污染原始 source
 			else {
 				resultingSource.putAll(source);
+				// addLast 表示默认属性源优先级很低
 				sources.addLast(propertySource);
 			}
 		}

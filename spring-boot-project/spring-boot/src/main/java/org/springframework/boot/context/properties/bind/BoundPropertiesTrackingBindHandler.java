@@ -16,11 +16,11 @@
 
 package org.springframework.boot.context.properties.bind;
 
-import java.util.function.Consumer;
-
 import org.springframework.boot.context.properties.source.ConfigurationProperty;
 import org.springframework.boot.context.properties.source.ConfigurationPropertyName;
 import org.springframework.util.Assert;
+
+import java.util.function.Consumer;
 
 /**
  * {@link BindHandler} that can be used to track bound configuration properties.
@@ -29,6 +29,8 @@ import org.springframework.util.Assert;
  * @since 2.3.0
  */
 public class BoundPropertiesTrackingBindHandler extends AbstractBindHandler {
+
+	// 这个类与 BoundConfigurationProperties 密不可分，就是用于收集信息的
 
 	private final Consumer<ConfigurationProperty> consumer;
 

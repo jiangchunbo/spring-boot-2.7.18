@@ -35,8 +35,14 @@ final class DefaultPropertyMapper implements PropertyMapper {
 
 	public static final PropertyMapper INSTANCE = new DefaultPropertyMapper();
 
+	/**
+	 * 这个字段只是一个极小粒度的本地缓存，避免对同一个 key 重复执行 map
+	 */
 	private LastMapping<ConfigurationPropertyName, List<String>> lastMappedConfigurationPropertyName;
 
+	/**
+	 * 同上，也是本地缓存，减少对同一个 key 重复执行的 map
+	 */
 	private LastMapping<String, ConfigurationPropertyName> lastMappedPropertyName;
 
 	private DefaultPropertyMapper() {

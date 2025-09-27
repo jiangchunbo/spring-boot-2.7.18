@@ -258,6 +258,8 @@ public class Binder {
 	 * @return the binding result (never {@code null})
 	 */
 	public <T> BindResult<T> bind(String name, Bindable<T> target, BindHandler handler) {
+		// 第 1 个参数是 String，其实是 prefix
+		// 不管怎么样 总是会包装为 ConfigurationPropertyName
 		return bind(ConfigurationPropertyName.of(name), target, handler);
 	}
 
@@ -272,7 +274,12 @@ public class Binder {
 	 * @return the binding result (never {@code null})
 	 */
 	public <T> BindResult<T> bind(ConfigurationPropertyName name, Bindable<T> target, BindHandler handler) {
+		// 比较底层的方法
+
+		// 执行绑定
 		T bound = bind(name, target, handler, false);
+
+		// 封装保定结果
 		return BindResult.of(bound);
 	}
 
@@ -344,38 +351,64 @@ public class Binder {
 	private <T> T bind(ConfigurationPropertyName name, Bindable<T> target, BindHandler handler, boolean create) {
 		Assert.notNull(name, "Name must not be null");
 		Assert.notNull(target, "Target must not be null");
+
+		// 确保 handler 是存在的，避免其是 null
 		handler = (handler != null) ? handler : this.defaultBindHandler;
+
+		// 创建一个 Context -> 猜测存储中间结果
 		Context context = new Context();
+
+		// 执行绑定
 		return bind(name, target, handler, context, false, create);
 	}
 
 	private <T> T bind(ConfigurationPropertyName name, Bindable<T> target, BindHandler handler, Context context,
 					   boolean allowRecursiveBinding, boolean create) {
 		try {
+			// 触发 start 并得到一个返回值(默认其实没有用，因为默认实现没有任何一个返回 null)
 			Bindable<T> replacementTarget = handler.onStart(name, target, context);
+
+			// 若返回了 null，那么就不会再继续处理，也就是不会执行 bind (目前不会执行到这个逻辑)
 			if (replacementTarget == null) {
+				// 处理绑定结果 result == null
 				return handleBindResult(name, target, handler, context, null, create);
 			}
+
+			// 执行绑定
 			target = replacementTarget;
 			Object bound = bindObject(name, target, handler, context, allowRecursiveBinding);
+			// 处理绑定结果
 			return handleBindResult(name, target, handler, context, bound, create);
 		} catch (Exception ex) {
 			return handleBindError(name, target, handler, context, ex);
 		}
 	}
 
+	/**
+	 * 处理绑定结果。
+	 * <p>// onSuccess
+	 * 有两个地方会进入此处：
+	 * --> 绑定结果是 null，可能是因为 onStart 返回 null
+	 * --> 绑定结果是非 null，正常进行绑定
+	 */
 	private <T> T handleBindResult(ConfigurationPropertyName name, Bindable<T> target, BindHandler handler,
 								   Context context, Object result, boolean create) throws Exception {
 		if (result != null) {
+			// onSuccess
 			result = handler.onSuccess(name, target, context, result);
 			result = context.getConverter().convert(result, target);
 		}
+
+		// 绑定结果是 null 但是是否 create ？
 		if (result == null && create) {
 			result = create(target, context);
+			// onCreate
 			result = handler.onCreate(name, target, context, result);
 			result = context.getConverter().convert(result, target);
 			Assert.state(result != null, () -> "Unable to create instance for " + target.getType());
 		}
+
+		// onFinish
 		handler.onFinish(name, target, context, result);
 		return context.getConverter().convert(result, target);
 	}
@@ -415,6 +448,7 @@ public class Binder {
 		}
 		if (property != null) {
 			try {
+				// 绑定属性
 				return bindProperty(target, context, property);
 			} catch (ConverterNotFoundException ex) {
 				// We might still be able to bind it using the recursive binders
@@ -454,9 +488,12 @@ public class Binder {
 
 	private <T> ConfigurationProperty findProperty(ConfigurationPropertyName name, Bindable<T> target,
 												   Context context) {
+		// 前缀是空的，或者(前缀不是空)禁止直接匹配
 		if (name.isEmpty() || target.hasBindRestriction(BindRestriction.NO_DIRECT_PROPERTY)) {
 			return null;
 		}
+
+		// 寻找 ConfigurationPropertySource
 		for (ConfigurationPropertySource source : context.getSources()) {
 			ConfigurationProperty property = source.getConfigurationProperty(name);
 			if (property != null) {
@@ -467,9 +504,16 @@ public class Binder {
 	}
 
 	private <T> Object bindProperty(Bindable<T> target, Context context, ConfigurationProperty property) {
+		// 设置到 context 中
 		context.setConfigurationProperty(property);
+
+		// 获取配置属性的值
 		Object result = property.getValue();
+
+		// 解析占位符
 		result = this.placeholdersResolver.resolvePlaceholders(result);
+
+		// 转换器
 		result = context.getConverter().convert(result, target);
 		return result;
 	}
@@ -586,10 +630,13 @@ public class Binder {
 		}
 
 		private <T> T withDataObject(Class<?> type, Supplier<T> supplier) {
+			// 把当前正在绑定的 JavaBean 类型入栈
 			this.dataObjectBindings.push(type);
 			try {
+				// 深度计数器 + 1，然后调用真正的绑定逻辑
 				return withIncreasedDepth(supplier);
 			} finally {
+				// 无论是否正常执行完毕，把类型弹出，保证栈状态正确
 				this.dataObjectBindings.pop();
 			}
 		}

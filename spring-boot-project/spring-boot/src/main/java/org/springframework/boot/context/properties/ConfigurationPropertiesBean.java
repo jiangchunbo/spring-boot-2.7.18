@@ -143,6 +143,8 @@ public final class ConfigurationPropertiesBean {
 	 * @return a bind target for use with the {@link Binder}
 	 */
 	public Bindable<?> asBindTarget() {
+		// 名字叫 asBindTarget，其实是 get 而已
+
 		return this.bindTarget;
 	}
 
@@ -305,12 +307,11 @@ public final class ConfigurationPropertiesBean {
 		Annotation[] annotations = (validated != null) ? new Annotation[]{annotation, validated}
 				: new Annotation[]{annotation};
 
-		// 1. factory -> method return type
-		// 2. type -> type
+		// 得到接下来用于 bind 的类型 ResolvableType
 		ResolvableType bindType = (factory != null) ? ResolvableType.forMethodReturnType(factory)
 				: ResolvableType.forClass(type);
 
-		// 得到一个 Bindable
+		// 得到一个 Bindable -> 附加注解
 		Bindable<Object> bindTarget = Bindable.of(bindType).withAnnotations(annotations);
 		if (instance != null) {
 			bindTarget = bindTarget.withExistingValue(instance);

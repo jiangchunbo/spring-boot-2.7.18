@@ -90,7 +90,7 @@ class ConfigurationPropertiesBinder {
 	}
 
 	/**
-	 * 绑定属性。似乎是将
+	 * 绑定属性
 	 */
 	BindResult<?> bind(ConfigurationPropertiesBean propertiesBean) {
 		// 取出其中的 Bindable
@@ -102,13 +102,19 @@ class ConfigurationPropertiesBinder {
 		// 得到一个责任链
 		BindHandler bindHandler = getBindHandler(target, annotation);
 
-		// binder -> bind
+		// 进行绑定
+		// 传入参数 prefix、绑定的目标 target、绑定处理器
 		return getBinder().bind(annotation.prefix(), target, bindHandler);
 	}
 
 	Object bindOrCreate(ConfigurationPropertiesBean propertiesBean) {
+		// 获取包装起来的 Bindable
 		Bindable<?> target = propertiesBean.asBindTarget();
+
+		// 获取注解
 		ConfigurationProperties annotation = propertiesBean.getAnnotation();
+
+		// 获取一个责任链
 		BindHandler bindHandler = getBindHandler(target, annotation);
 		return getBinder().bindOrCreate(annotation.prefix(), target, bindHandler);
 	}
@@ -159,10 +165,10 @@ class ConfigurationPropertiesBinder {
 	}
 
 	private IgnoreTopLevelConverterNotFoundBindHandler getHandler() {
-		// 从 application context 中获取一个对象 BoundConfigurationProperties
-		// 有可能不存在，不存在就算了
+		// BoundConfigurationProperties -> 用于存储配置属性，可能用于对外暴露
 		BoundConfigurationProperties bound = BoundConfigurationProperties.get(this.applicationContext);
 
+		// 如果存在 BoundConfigurationProperties，那么
 		return (bound != null)
 				? new IgnoreTopLevelConverterNotFoundBindHandler(new BoundPropertiesTrackingBindHandler(bound::add))
 				: new IgnoreTopLevelConverterNotFoundBindHandler();
@@ -227,6 +233,11 @@ class ConfigurationPropertiesBinder {
 				.collect(Collectors.toList());
 	}
 
+	/**
+	 * 创建一个专门用于 ConfigurationProperties 的 Binder
+	 *
+	 * @return Binder
+	 */
 	private Binder getBinder() {
 		if (this.binder == null) {
 			this.binder = new Binder(getConfigurationPropertySources(), getPropertySourcesPlaceholdersResolver(),

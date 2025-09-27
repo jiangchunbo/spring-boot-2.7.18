@@ -52,6 +52,11 @@ import org.springframework.util.StringUtils;
 public class ServerPortInfoApplicationContextInitializer implements
 		ApplicationContextInitializer<ConfigurableApplicationContext>, ApplicationListener<WebServerInitializedEvent> {
 
+	// 1. ApplicationContextInitializer
+
+	// 2. ApplicationListener 监听 WebServerInitializedEvent 能够在 server.port=0 时，也能知道监听的哪个端口
+
+
 	@Override
 	public void initialize(ConfigurableApplicationContext applicationContext) {
 		applicationContext.addApplicationListener(this);

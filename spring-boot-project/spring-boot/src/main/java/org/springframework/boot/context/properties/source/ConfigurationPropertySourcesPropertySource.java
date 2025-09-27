@@ -33,6 +33,9 @@ import org.springframework.core.env.PropertySource;
 class ConfigurationPropertySourcesPropertySource extends PropertySource<Iterable<ConfigurationPropertySource>>
 		implements OriginLookup<String> {
 
+
+	// 特殊的 PropertySource，内部承载的是 Iterable<ConfigurationPropertySource>
+
 	ConfigurationPropertySourcesPropertySource(String name, Iterable<ConfigurationPropertySource> source) {
 		super(name, source);
 	}
@@ -44,6 +47,7 @@ class ConfigurationPropertySourcesPropertySource extends PropertySource<Iterable
 
 	@Override
 	public Object getProperty(String name) {
+		// 获取属性
 		ConfigurationProperty configurationProperty = findConfigurationProperty(name);
 		return (configurationProperty != null) ? configurationProperty.getValue() : null;
 	}
@@ -55,6 +59,7 @@ class ConfigurationPropertySourcesPropertySource extends PropertySource<Iterable
 
 	private ConfigurationProperty findConfigurationProperty(String name) {
 		try {
+			// 将属性名封装为一个 ConfigurationPropertyName
 			return findConfigurationProperty(ConfigurationPropertyName.of(name, true));
 		}
 		catch (Exception ex) {
@@ -66,6 +71,8 @@ class ConfigurationPropertySourcesPropertySource extends PropertySource<Iterable
 		if (name == null) {
 			return null;
 		}
+
+		// 从 Iterable<ConfigurationPropertySource> 中寻找 ConfigurationProperty
 		for (ConfigurationPropertySource configurationPropertySource : getSource()) {
 			ConfigurationProperty configurationProperty = configurationPropertySource.getConfigurationProperty(name);
 			if (configurationProperty != null) {

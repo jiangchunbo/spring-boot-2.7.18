@@ -31,6 +31,8 @@ import org.springframework.util.Assert;
 
 /**
  * Utility to deduce the {@link PropertySources} to use for configuration binding.
+ * <p>
+ * 一个用于推断 PropertySources 的工具类
  *
  * @author Phillip Webb
  */
@@ -40,32 +42,53 @@ class PropertySourcesDeducer {
 
 	private final ApplicationContext applicationContext;
 
+	/**
+	 * 唯一构造器。仅被 ConfigurationPropertiesBinder 使用。
+	 *
+	 * @param applicationContext 应用上下文
+	 */
 	PropertySourcesDeducer(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
 
+	/**
+	 * 获取 PropertySources
+	 */
 	PropertySources getPropertySources() {
+		// 找到配置器，通过它获取 PropertySources
 		PropertySourcesPlaceholderConfigurer configurer = getSinglePropertySourcesPlaceholderConfigurer();
 		if (configurer != null) {
 			return configurer.getAppliedPropertySources();
 		}
+
+		// 或者从 Environment 中获取 MutablePropertySources
 		MutablePropertySources sources = extractEnvironmentPropertySources();
 		Assert.state(sources != null,
 				"Unable to obtain PropertySources from PropertySourcesPlaceholderConfigurer or Environment");
 		return sources;
 	}
 
+	/**
+	 * 获取唯一一个 PropertySourcesPlaceholderConfigurer
+	 */
 	private PropertySourcesPlaceholderConfigurer getSinglePropertySourcesPlaceholderConfigurer() {
 		// Take care not to cause early instantiation of all FactoryBeans
+		// 按照类型寻找 PropertySourcesPlaceholderConfigurer
 		Map<String, PropertySourcesPlaceholderConfigurer> beans = this.applicationContext
-			.getBeansOfType(PropertySourcesPlaceholderConfigurer.class, false, false);
+				.getBeansOfType(PropertySourcesPlaceholderConfigurer.class, false, false);
+
+		// 希望只能找到 1 个
 		if (beans.size() == 1) {
 			return beans.values().iterator().next();
 		}
+
+		// 如果找到多个，那么发出警告
 		if (beans.size() > 1 && logger.isWarnEnabled()) {
 			logger.warn("Multiple PropertySourcesPlaceholderConfigurer beans registered " + beans.keySet()
 					+ ", falling back to Environment");
 		}
+
+		// 如果找到多个，或者没有找到，那么返回 null
 		return null;
 	}
 

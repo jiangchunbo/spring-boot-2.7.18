@@ -72,6 +72,7 @@ class JavaBeanBinder implements DataObjectBinder {
 
 	private boolean hasKnownBindableProperties(ConfigurationPropertyName name, Context context) {
 		for (ConfigurationPropertySource source : context.getSources()) {
+			// 是否包含 name 的后代 (猜测就是以 name 为前缀的属性)
 			if (source.containsDescendantOf(name) == ConfigurationPropertyState.PRESENT) {
 				return true;
 			}
@@ -233,6 +234,8 @@ class JavaBeanBinder implements DataObjectBinder {
 			if (instance == null && !isInstantiable(resolvedType)) {
 				return null;
 			}
+
+			// cache 是一个非常微小的缓存，用与减少内省的开销
 			Bean<?> bean = Bean.cached;
 			if (bean == null || !bean.isOfType(type, resolvedType)) {
 				bean = new Bean<>(type, resolvedType);

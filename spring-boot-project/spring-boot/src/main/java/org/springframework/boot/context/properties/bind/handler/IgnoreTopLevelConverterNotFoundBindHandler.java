@@ -44,6 +44,10 @@ public class IgnoreTopLevelConverterNotFoundBindHandler extends AbstractBindHand
 	 * @param parent the parent handler
 	 */
 	public IgnoreTopLevelConverterNotFoundBindHandler(BindHandler parent) {
+
+		// 目前来看，只有一个 BoundPropertiesTrackingBindHandler 作为其 parent
+		// 那么也就是 onSuccess 时，会调用 BoundPropertiesTrackingBindHandler 汇总绑定成功的属性
+
 		super(parent);
 	}
 
