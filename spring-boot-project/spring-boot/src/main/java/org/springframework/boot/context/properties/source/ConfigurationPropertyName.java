@@ -46,9 +46,9 @@ import org.springframework.util.StringUtils;
  *
  * @author Phillip Webb
  * @author Madhura Bhave
- * @since 2.0.0
  * @see #of(CharSequence)
  * @see ConfigurationPropertySource
+ * @since 2.0.0
  */
 public final class ConfigurationPropertyName implements Comparable<ConfigurationPropertyName> {
 
@@ -74,6 +74,7 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 
 	/**
 	 * Returns {@code true} if this {@link ConfigurationPropertyName} is empty.
+	 *
 	 * @return {@code true} if the name is empty
 	 */
 	public boolean isEmpty() {
@@ -82,6 +83,7 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 
 	/**
 	 * Return if the last element in the name is indexed.
+	 *
 	 * @return {@code true} if the last element is indexed
 	 */
 	public boolean isLastElementIndexed() {
@@ -91,6 +93,7 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 
 	/**
 	 * Return {@code true} if any element in the name is indexed.
+	 *
 	 * @return if the element has one or more indexed elements
 	 * @since 2.2.10
 	 */
@@ -105,6 +108,7 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 
 	/**
 	 * Return if the element in the name is indexed.
+	 *
 	 * @param elementIndex the index of the element
 	 * @return {@code true} if the element is indexed
 	 */
@@ -114,6 +118,7 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 
 	/**
 	 * Return if the element in the name is indexed and numeric.
+	 *
 	 * @param elementIndex the index of the element
 	 * @return {@code true} if the element is indexed and numeric
 	 */
@@ -123,6 +128,7 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 
 	/**
 	 * Return the last element in the name in the given form.
+	 *
 	 * @param form the form to return
 	 * @return the last element
 	 */
@@ -133,8 +139,9 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 
 	/**
 	 * Return an element in the name in the given form.
+	 *
 	 * @param elementIndex the element index
-	 * @param form the form to return
+	 * @param form         the form to return
 	 * @return the last element
 	 */
 	public String getElement(int elementIndex, Form form) {
@@ -189,6 +196,7 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 
 	/**
 	 * Return the total number of elements in the name.
+	 *
 	 * @return the number of elements
 	 */
 	public int getNumberOfElements() {
@@ -197,6 +205,7 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 
 	/**
 	 * Create a new {@link ConfigurationPropertyName} by appending the given suffix.
+	 *
 	 * @param suffix the elements to append
 	 * @return a new {@link ConfigurationPropertyName}
 	 * @throws InvalidConfigurationPropertyNameException if the result is not valid
@@ -211,6 +220,7 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 
 	/**
 	 * Create a new {@link ConfigurationPropertyName} by appending the given suffix.
+	 *
 	 * @param suffix the elements to append
 	 * @return a new {@link ConfigurationPropertyName}
 	 * @since 2.5.0
@@ -225,6 +235,7 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 	/**
 	 * Return the parent of this {@link ConfigurationPropertyName} or
 	 * {@link ConfigurationPropertyName#EMPTY} if there is no parent.
+	 *
 	 * @return the parent name
 	 */
 	public ConfigurationPropertyName getParent() {
@@ -236,6 +247,7 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 	 * Return a new {@link ConfigurationPropertyName} by chopping this name to the given
 	 * {@code size}. For example, {@code chop(1)} on the name {@code foo.bar} will return
 	 * {@code foo}.
+	 *
 	 * @param size the size to chop
 	 * @return the chopped name
 	 */
@@ -250,6 +262,7 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 	 * Return a new {@link ConfigurationPropertyName} by based on this name offset by
 	 * specific element index. For example, {@code chop(1)} on the name {@code foo.bar}
 	 * will return {@code bar}.
+	 *
 	 * @param offset the element offset
 	 * @return the sub name
 	 * @since 2.5.0
@@ -269,6 +282,7 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 
 	/**
 	 * Returns {@code true} if this element is an immediate parent of the specified name.
+	 *
 	 * @param name the name to check
 	 * @return {@code true} if this name is an ancestor
 	 */
@@ -283,6 +297,7 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 	/**
 	 * Returns {@code true} if this element is an ancestor (immediate or nested parent) of
 	 * the specified name.
+	 *
 	 * @param name the name to check
 	 * @return {@code true} if this name is an ancestor
 	 */
@@ -314,8 +329,7 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 				if (result != 0) {
 					return result;
 				}
-			}
-			catch (ArrayIndexOutOfBoundsException ex) {
+			} catch (ArrayIndexOutOfBoundsException ex) {
 				throw new RuntimeException(ex);
 			}
 		}
@@ -412,14 +426,11 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 			char ch2 = e2.charAt(i, i2);
 			if (ch1 == '-') {
 				i1++;
-			}
-			else if (ch2 == '-') {
+			} else if (ch2 == '-') {
 				i2++;
-			}
-			else if (ch1 != ch2) {
+			} else if (ch1 != ch2) {
 				return false;
-			}
-			else {
+			} else {
 				i1++;
 				i2++;
 			}
@@ -454,14 +465,11 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 			char ch2 = indexed2 ? e2.charAt(i, i2) : Character.toLowerCase(e2.charAt(i, i2));
 			if (!indexed1 && !ElementsParser.isAlphaNumeric(ch1)) {
 				i1++;
-			}
-			else if (!indexed2 && !ElementsParser.isAlphaNumeric(ch2)) {
+			} else if (!indexed2 && !ElementsParser.isAlphaNumeric(ch2)) {
 				i2++;
-			}
-			else if (ch1 != ch2) {
+			} else if (ch1 != ch2) {
 				return false;
-			}
-			else {
+			} else {
 				i1++;
 				i2++;
 			}
@@ -550,8 +558,7 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 				result.append('[');
 				result.append(getElement(i, Form.ORIGINAL));
 				result.append(']');
-			}
-			else {
+			} else {
 				result.append(getElement(i, Form.DASHED));
 			}
 		}
@@ -561,6 +568,7 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 	/**
 	 * Returns if the given name is valid. If this method returns {@code true} then the
 	 * name may be used with {@link #of(CharSequence)} without throwing an exception.
+	 *
 	 * @param name the name to test
 	 * @return {@code true} if the name is valid
 	 */
@@ -570,6 +578,7 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 
 	/**
 	 * Return a {@link ConfigurationPropertyName} for the specified string.
+	 *
 	 * @param name the source name
 	 * @return a {@link ConfigurationPropertyName} instance
 	 * @throws InvalidConfigurationPropertyNameException if the name is not valid
@@ -581,6 +590,7 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 	/**
 	 * Return a {@link ConfigurationPropertyName} for the specified string or {@code null}
 	 * if the name is not valid.
+	 *
 	 * @param name the source name
 	 * @return a {@link ConfigurationPropertyName} instance
 	 * @since 2.3.1
@@ -591,11 +601,12 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 
 	/**
 	 * Return a {@link ConfigurationPropertyName} for the specified string.
-	 * @param name the source name
+	 *
+	 * @param name                the source name
 	 * @param returnNullIfInvalid if null should be returned if the name is not valid
 	 * @return a {@link ConfigurationPropertyName} instance
 	 * @throws InvalidConfigurationPropertyNameException if the name is not valid and
-	 * {@code returnNullIfInvalid} is {@code false}
+	 *                                                   {@code returnNullIfInvalid} is {@code false}
 	 */
 	static ConfigurationPropertyName of(CharSequence name, boolean returnNullIfInvalid) {
 		Elements elements = elementsOf(name, returnNullIfInvalid);
@@ -618,14 +629,19 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 		if (name.length() == 0) {
 			return Elements.EMPTY;
 		}
+
+		// 以 . 开头或者以 . 结尾都是无效
 		if (name.charAt(0) == '.' || name.charAt(name.length() - 1) == '.') {
 			if (returnNullIfInvalid) {
 				return null;
 			}
 			throw new InvalidConfigurationPropertyNameException(name, Collections.singletonList('.'));
 		}
+
+		// 传入 name 立即解析，得到一堆 Element
 		Elements elements = new ElementsParser(name, '.', parserCapacity).parse();
 		for (int i = 0; i < elements.getSize(); i++) {
+			// 如果 element 不是统一格式
 			if (elements.getType(i) == ElementType.NON_UNIFORM) {
 				if (returnNullIfInvalid) {
 					return null;
@@ -650,7 +666,8 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 	/**
 	 * Create a {@link ConfigurationPropertyName} by adapting the given source. See
 	 * {@link #adapt(CharSequence, char, Function)} for details.
-	 * @param name the name to parse
+	 *
+	 * @param name      the name to parse
 	 * @param separator the separator used to split the name
 	 * @return a {@link ConfigurationPropertyName}
 	 */
@@ -666,13 +683,14 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 	 * <p>
 	 * The {@code elementValueProcessor} function may be used if additional processing is
 	 * required on the extracted element values.
-	 * @param name the name to parse
-	 * @param separator the separator used to split the name
+	 *
+	 * @param name                  the name to parse
+	 * @param separator             the separator used to split the name
 	 * @param elementValueProcessor a function to process element values
 	 * @return a {@link ConfigurationPropertyName}
 	 */
 	static ConfigurationPropertyName adapt(CharSequence name, char separator,
-			Function<CharSequence, CharSequence> elementValueProcessor) {
+										   Function<CharSequence, CharSequence> elementValueProcessor) {
 		Assert.notNull(name, "Name must not be null");
 		if (name.length() == 0) {
 			return EMPTY;
@@ -847,6 +865,7 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 		/**
 		 * Returns if the element source can be used as a shortcut for an operation such
 		 * as {@code equals} or {@code toString}.
+		 *
 		 * @param requiredType the required type
 		 * @return {@code true} if all elements match at least one of the types
 		 */
@@ -857,7 +876,8 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 		/**
 		 * Returns if the element source can be used as a shortcut for an operation such
 		 * as {@code equals} or {@code toString}.
-		 * @param requiredType the required type
+		 *
+		 * @param requiredType    the required type
 		 * @param alternativeType and alternative required type
 		 * @return {@code true} if all elements match at least one of the types
 		 */
@@ -881,6 +901,8 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 
 	/**
 	 * Main parsing logic used to convert a {@link CharSequence} to {@link Elements}.
+	 * <p>
+	 * [静态类]负责将字符串解析为一个 Elements，每个元素都有其 ElementType
 	 */
 	private static class ElementsParser {
 
@@ -920,31 +942,46 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 			int length = this.source.length();
 			int openBracketCount = 0;
 			int start = 0;
+
+			// 在关键分隔符的节点会变更 type
 			ElementType type = ElementType.EMPTY;
 			for (int i = 0; i < length; i++) {
+				// 获取当前字符，这个很好理解
 				char ch = this.source.charAt(i);
+
+				// 下面判断当前字符是否是特殊分隔符
+
+				// 1. [
 				if (ch == '[') {
+					// 如果 openBracketCount == 0，那么所有括号都闭合了，开启新的解析
 					if (openBracketCount == 0) {
-						add(start, i, type, valueProcessor);
-						start = i + 1;
-						type = ElementType.NUMERICALLY_INDEXED;
+						add(start, i, type, valueProcessor); // 添加
+						start = i + 1; // 标记开始位置
+						type = ElementType.NUMERICALLY_INDEXED; // 假定接下来的类型是 "数字"
 					}
+					// 如果 openBracketCount != 0，那么不对称，可能是 [A[B]C]
 					openBracketCount++;
 				}
+				// 2. ]
 				else if (ch == ']') {
 					openBracketCount--;
+					// 如果 openBracketCount != 0，那么不对称，可能是 [A[B]C]，只是退出了 [B] 这个 key 的组成部分而已
 					if (openBracketCount == 0) {
 						add(start, i, type, valueProcessor);
 						start = i + 1;
 						type = ElementType.EMPTY;
 					}
 				}
+				// 3. 分隔符
 				else if (!type.isIndexed() && ch == this.separator) {
 					add(start, i, type, valueProcessor);
 					start = i + 1;
 					type = ElementType.EMPTY;
 				}
+				// 4. 其他字符
 				else {
+					// 更新 type
+					// 根据现在的情况，重新校准 type
 					type = updateType(type, ch, i - start);
 				}
 			}
@@ -956,13 +993,17 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 		}
 
 		private ElementType updateType(ElementType existingType, char ch, int index) {
+			// 当前正在索引中 [可能是数字索引][可能是非数字索引]
 			if (existingType.isIndexed()) {
+				// 如果被误认为是数字索引，但是又不是数字，那么变更为非数字索引
 				if (existingType == ElementType.NUMERICALLY_INDEXED && !isNumeric(ch)) {
 					return ElementType.INDEXED;
 				}
 				return existingType;
 			}
+
 			if (existingType == ElementType.EMPTY && isValidChar(ch, index)) {
+				// 如果 index == 0 -> 差值是 0，那么，这就是一个元素的开头字符
 				return (index == 0) ? ElementType.UNIFORM : ElementType.NON_UNIFORM;
 			}
 			if (existingType == ElementType.UNIFORM && ch == '-') {
@@ -991,15 +1032,21 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 				if (this.resolved == null) {
 					this.resolved = new CharSequence[this.start.length];
 				}
+				// 转换成一个新的字符串
 				CharSequence resolved = valueProcessor.apply(this.source.subSequence(start, end));
 				Elements resolvedElements = new ElementsParser(resolved, '.').parse();
 				Assert.state(resolvedElements.getSize() == 1, "Resolved element must not contain multiple elements");
 				this.resolved[this.size] = resolvedElements.get(0);
 				type = resolvedElements.getType(0);
 			}
+
+			// 保存这个位置的元素 start
 			this.start[this.size] = start;
+			// 保存这个位置的元素 end
 			this.end[this.size] = end;
+			// 保存这个位置的元素类型 type
 			this.type[this.size] = type;
+			// 追加一个新的元素，所以 size++，只有这个地方 size 会增加
 			this.size++;
 		}
 
@@ -1024,6 +1071,13 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 			return dest;
 		}
 
+		/**
+		 * 有效字符是 字母、数字、短横线(=)
+		 *
+		 * @param ch    字符
+		 * @param index
+		 * @return
+		 */
 		static boolean isValidChar(char ch, int index) {
 			return isAlpha(ch) || isNumeric(ch) || (index != 0 && ch == '-');
 		}

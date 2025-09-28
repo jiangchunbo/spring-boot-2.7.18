@@ -40,6 +40,9 @@ import org.springframework.util.ConcurrentReferenceHashMap.ReferenceType;
  */
 class SpringConfigurationPropertySources implements Iterable<ConfigurationPropertySource> {
 
+	// 		这个类可迭代的是 ConfigurationPropertySource，但是内部存储的是 PropertySource
+	// 因此，可以知道，一定存在某种转换
+
 	private final Iterable<PropertySource<?>> sources;
 
 	private final Map<PropertySource<?>, ConfigurationPropertySource> cache = new ConcurrentReferenceHashMap<>(16,

@@ -64,7 +64,10 @@ public class ServerPortInfoApplicationContextInitializer implements
 
 	@Override
 	public void onApplicationEvent(WebServerInitializedEvent event) {
+		// 构造属性名 一般就是 local.server.port
 		String propertyName = "local." + getName(event.getApplicationContext()) + ".port";
+
+		// 将属性添加到 Environment 中
 		setPortProperty(event.getApplicationContext(), propertyName, event.getWebServer().getPort());
 	}
 
@@ -84,9 +87,13 @@ public class ServerPortInfoApplicationContextInitializer implements
 
 	@SuppressWarnings("unchecked")
 	private void setPortProperty(ConfigurableEnvironment environment, String propertyName, int port) {
+		// 拿出一个聚合体
 		MutablePropertySources sources = environment.getPropertySources();
+
+		// 检查是否有名字叫 "server.ports" 的 PropertySource (一般都是没有的)
 		PropertySource<?> source = sources.get("server.ports");
 		if (source == null) {
+			// 自己创建一个，然后 addFirst 提高优先级，插入到最前面
 			source = new MapPropertySource("server.ports", new HashMap<>());
 			sources.addFirst(source);
 		}

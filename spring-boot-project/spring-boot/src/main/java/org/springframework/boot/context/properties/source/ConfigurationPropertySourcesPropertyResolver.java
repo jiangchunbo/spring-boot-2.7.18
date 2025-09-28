@@ -98,9 +98,17 @@ class ConfigurationPropertySourcesPropertyResolver extends AbstractPropertyResol
 	}
 
 	private ConfigurationPropertySourcesPropertySource getAttached() {
+		// 从所有的属性源中找到一个名字叫 configurationProperties
+		// 🧸: 类型一定是 ConfigurationPropertySourcesPropertySource 直接 "自信强转"
+		// 🧸: ConfigurationPropertySourcesPropertySource 有点类似一个聚合体
 		ConfigurationPropertySourcesPropertySource attached = (ConfigurationPropertySourcesPropertySource) ConfigurationPropertySources
 			.getAttached(this.propertySources);
+
+		// 获取 PropertySource 底层的泛型 T
+		// 🧸: 对于 ConfigurationPropertySourcesPropertySource 来说，包装起来的是一堆 PropertySource
 		Iterable<ConfigurationPropertySource> attachedSource = (attached != null) ? attached.getSource() : null;
+
+		// 检查一下是否内部聚合的东西就是它
 		if ((attachedSource instanceof SpringConfigurationPropertySources)
 				&& ((SpringConfigurationPropertySources) attachedSource).isUsingSources(this.propertySources)) {
 			return attached;

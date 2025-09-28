@@ -92,12 +92,12 @@ public final class ConfigurationPropertySources {
 		// 从环境中获取 Mutable 属性源。意思就是说可以变化的属性源。
 		MutablePropertySources sources = ((ConfigurableEnvironment) environment).getPropertySources();
 
-		// 获得一个名字叫 configurationProperties 的属性源
+		// 获取 PropertySource 的聚合体
 		PropertySource<?> attached = getAttached(sources);
 
-
+		// 如果没有拿到聚合体，或者，拿到了聚合体，但是里面的东西不是期望的那些东西了
 		if (attached == null || !isUsingSources(attached, sources)) {
-			// ConfigurationPropertySourcesPropertySource 这个属性源是 Spring Boot 设计的
+			// 创建新的聚合体
 			attached = new ConfigurationPropertySourcesPropertySource(ATTACHED_PROPERTY_SOURCE_NAME, new SpringConfigurationPropertySources(sources));
 		}
 

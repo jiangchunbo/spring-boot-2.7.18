@@ -54,6 +54,9 @@ class SpringConfigurationPropertySource implements ConfigurationPropertySource {
 
 	private static final PropertyMapper[] DEFAULT_MAPPERS = {DefaultPropertyMapper.INSTANCE};
 
+	/**
+	 * System、Environment 使用特殊的映射器
+	 */
 	private static final PropertyMapper[] SYSTEM_ENVIRONMENT_MAPPERS = {SystemEnvironmentPropertyMapper.INSTANCE,
 			DefaultPropertyMapper.INSTANCE};
 
@@ -151,6 +154,8 @@ class SpringConfigurationPropertySource implements ConfigurationPropertySource {
 	static SpringConfigurationPropertySource from(PropertySource<?> source) {
 		Assert.notNull(source, "Source must not be null");
 		PropertyMapper[] mappers = getPropertyMappers(source);
+
+		// 试探地检测 source 是否可以枚举，一般都是可枚举地，除了一些特殊情况
 		if (isFullEnumerable(source)) {
 			return new SpringIterableConfigurationPropertySource((EnumerablePropertySource<?>) source, mappers);
 		}
@@ -173,6 +178,9 @@ class SpringConfigurationPropertySource implements ConfigurationPropertySource {
 				|| name.endsWith("-" + StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME);
 	}
 
+	/**
+	 * 似乎是兼容某些不可枚举的 Map 情况，AI 说是早期 JDK、移植版(IBM J9)
+	 */
 	private static boolean isFullEnumerable(PropertySource<?> source) {
 		PropertySource<?> rootSource = getRootSource(source);
 		if (rootSource.getSource() instanceof Map) {
