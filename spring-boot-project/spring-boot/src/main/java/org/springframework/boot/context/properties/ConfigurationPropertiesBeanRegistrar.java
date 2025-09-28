@@ -68,11 +68,15 @@ final class ConfigurationPropertiesBeanRegistrar {
 		}
 	}
 
+	/**
+	 * 这个方法是关于 ConfigurationPropertiesBean 如何命名的策略方法
+	 */
 	private String getName(Class<?> type, MergedAnnotation<ConfigurationProperties> annotation) {
-		// 获取前缀，也可能没有前缀
-		String prefix = annotation.isPresent() ? annotation.getString("prefix") : "";
+		// 配置属性 bean 可能有一个前缀，也可能没有，要看注解是否配置了 prefix
 
-		// prefix-typeName 或者直接光秃秃 typeName
+		// 1. <prefix> + "-" + <typeName>
+		// 2. <typeName>
+		String prefix = annotation.isPresent() ? annotation.getString("prefix") : "";
 		return (StringUtils.hasText(prefix) ? prefix + "-" + type.getName() : type.getName());
 	}
 

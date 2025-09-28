@@ -133,10 +133,18 @@ public class ValidationBindHandler extends AbstractBindHandler {
 		ValidationResult result = null;
 		for (Validator validator : this.validators) {
 			if (validator.supports(type)) {
+				// 其实就是个初始化，result 第一次肯定是 null
+				// ----> 注意这个 name，可以通过该对象获取属性名
+				// ----> 创建 ValidationResult 存储校验的结果
 				result = (result != null) ? result : new ValidationResult(name, target);
+
+				// 使用 Validator 进行校验
+				// tips: 第 2 个参数传入的是 result，实际上也是一个 errors
 				validator.validate(target, result);
 			}
 		}
+
+		// 判断是否存在错误
 		if (result != null && result.hasErrors()) {
 			this.exception = new BindValidationException(result.getValidationErrors());
 		}
