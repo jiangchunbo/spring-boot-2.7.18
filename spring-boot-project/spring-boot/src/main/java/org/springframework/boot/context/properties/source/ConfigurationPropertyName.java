@@ -67,6 +67,11 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 
 	private int hashCode;
 
+	/**
+	 * 这个构造函数是私有的，也就是只允许内部使用
+	 *
+	 * @param elements Elements
+	 */
 	private ConfigurationPropertyName(Elements elements) {
 		this.elements = elements;
 		this.uniformElements = new CharSequence[elements.getSize()];
@@ -150,7 +155,10 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 		if (type.isIndexed()) {
 			return element.toString();
 		}
+
+		// 如果需要获取原始格式
 		if (form == Form.ORIGINAL) {
+			// 如果非统一格式，就直接返回
 			if (type != ElementType.NON_UNIFORM) {
 				return element.toString();
 			}
@@ -171,6 +179,8 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 	}
 
 	private CharSequence convertToOriginalForm(CharSequence element) {
+		// 不强制转换为小写
+		// 保留 '_' 和合法字符
 		return convertElement(element, false,
 				(ch, i) -> ch == '_' || ElementsParser.isValidChar(Character.toLowerCase(ch), i));
 	}
@@ -183,6 +193,13 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 		return convertElement(element, true, (ch, i) -> ElementsParser.isAlphaNumeric(ch));
 	}
 
+	/**
+	 * 通用的字符串处理工具
+	 * <p>
+	 * 遍历 element 每个字符，
+	 * - 根据 lowercase 决定强制转换为小写，还是保留原始字符
+	 * - 根据 filter 决定是否保留
+	 */
 	private CharSequence convertElement(CharSequence element, boolean lowercase, ElementCharPredicate filter) {
 		StringBuilder result = new StringBuilder(element.length());
 		for (int i = 0; i < element.length(); i++) {
@@ -543,6 +560,11 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 		return this.string;
 	}
 
+	/**
+	 * 用于 toString 获取属性的名字
+	 *
+	 * @return
+	 */
 	private String buildToString() {
 		if (this.elements.canShortcutWithSource(ElementType.UNIFORM, ElementType.DASHED)) {
 			return this.elements.getSource().toString();
@@ -604,11 +626,13 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 	 *
 	 * @param name                the source name
 	 * @param returnNullIfInvalid if null should be returned if the name is not valid
+	 *                            如果 name 无效，是否应该返回 null
 	 * @return a {@link ConfigurationPropertyName} instance
 	 * @throws InvalidConfigurationPropertyNameException if the name is not valid and
 	 *                                                   {@code returnNullIfInvalid} is {@code false}
 	 */
 	static ConfigurationPropertyName of(CharSequence name, boolean returnNullIfInvalid) {
+		// 通过静态方法 elementsOf 得到 Elements 对象
 		Elements elements = elementsOf(name, returnNullIfInvalid);
 		return (elements != null) ? new ConfigurationPropertyName(elements) : null;
 	}
@@ -638,8 +662,9 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 			throw new InvalidConfigurationPropertyNameException(name, Collections.singletonList('.'));
 		}
 
-		// 传入 name 立即解析，得到一堆 Element
-		Elements elements = new ElementsParser(name, '.', parserCapacity).parse();
+		// 使用 '.' 作为分隔符
+		Elements elements = new ElementsParser(name, '.', parserCapacity)
+				.parse();
 		for (int i = 0; i < elements.getSize(); i++) {
 			// 如果 element 不是统一格式
 			if (elements.getType(i) == ElementType.NON_UNIFORM) {
@@ -910,6 +935,9 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 
 		private final CharSequence source;
 
+		/**
+		 * 以 separator 作为分隔符，拆分元素
+		 */
 		private final char separator;
 
 		private int size;
@@ -1002,14 +1030,22 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 				return existingType;
 			}
 
+			// 如果当前是 EMPTY，并且遇到合法字符，那么进入有效字符阶段
 			if (existingType == ElementType.EMPTY && isValidChar(ch, index)) {
-				// 如果 index == 0 -> 差值是 0，那么，这就是一个元素的开头字符
+				// 如果当前是 element 的开头 (index == 0)，那么一切很好，元素是 统一的
+				// 如果当前 index > 0，说明已经跳过了一些字符，却依然是 EMPTY，那么这是一个不规范的名字
 				return (index == 0) ? ElementType.UNIFORM : ElementType.NON_UNIFORM;
 			}
 			if (existingType == ElementType.UNIFORM && ch == '-') {
 				return ElementType.DASHED;
 			}
+
+			// 当前 index 出现的字符不是合法字符
 			if (!isValidChar(ch, index)) {
+				// 思考：
+				// 1. 如果遇到一个非法字符，那么一般认为理解可以返回 NON_UNIFORM
+				// 2. 但是，这里有一个特殊情况，有可能还没遇到开头的字符，所以需要检查是否保持 EMPTY 的状态
+
 				if (existingType == ElementType.EMPTY && !isValidChar(Character.toLowerCase(ch), index)) {
 					return ElementType.EMPTY;
 				}
@@ -1019,15 +1055,19 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 		}
 
 		private void add(int start, int end, ElementType type, Function<CharSequence, CharSequence> valueProcessor) {
+			// start end 之间甚至都没有元素空间
 			if ((end - start) < 1 || type == ElementType.EMPTY) {
 				return;
 			}
+
+			// 扩容
 			if (this.start.length == this.size) {
 				this.start = expand(this.start);
 				this.end = expand(this.end);
 				this.type = expand(this.type);
 				this.resolved = expand(this.resolved);
 			}
+
 			if (valueProcessor != null) {
 				if (this.resolved == null) {
 					this.resolved = new CharSequence[this.start.length];
@@ -1072,11 +1112,7 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 		}
 
 		/**
-		 * 有效字符是 字母、数字、短横线(=)
-		 *
-		 * @param ch    字符
-		 * @param index
-		 * @return
+		 * 合法的字符是小写字母、数字、短横线（不在开头）
 		 */
 		static boolean isValidChar(char ch, int index) {
 			return isAlpha(ch) || isNumeric(ch) || (index != 0 && ch == '-');
@@ -1119,6 +1155,8 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 
 		/**
 		 * The element contains non-uniform characters and will need to be converted.
+		 * <p>
+		 * 不统一的格式，含有大小写混合、下划线、空格等异常字符
 		 */
 		NON_UNIFORM(false),
 

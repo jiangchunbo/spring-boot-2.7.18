@@ -57,6 +57,7 @@ class ConfigurationPropertySourcesPropertyResolver extends AbstractPropertyResol
 
 	@Override
 	public String getProperty(String key) {
+		// 期望返回值类型 String
 		return getProperty(key, String.class, true);
 	}
 
@@ -71,13 +72,18 @@ class ConfigurationPropertySourcesPropertyResolver extends AbstractPropertyResol
 	}
 
 	private <T> T getProperty(String key, Class<T> targetValueType, boolean resolveNestedPlaceholders) {
+		// 寻找属性得到 value
 		Object value = findPropertyValue(key);
 		if (value == null) {
 			return null;
 		}
+
+		// 解析内嵌的占位符
 		if (resolveNestedPlaceholders && value instanceof String) {
 			value = resolveNestedPlaceholders((String) value);
 		}
+
+		// 转换类型
 		return convertValueIfNecessary(value, targetValueType);
 	}
 
