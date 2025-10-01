@@ -67,16 +67,21 @@ class SoftReferenceConfigurationPropertyCache<T> implements ConfigurationPropert
 
 	/**
 	 * Get a value from the cache, creating it if necessary.
-	 * @param factory a factory used to create the item if there is no reference to it.
+	 *
+	 * @param factory       a factory used to create the item if there is no reference to it.
 	 * @param refreshAction action called to refresh the value if it has expired
+	 *                      如果过期了，就刷新
 	 * @return the value from the cache
 	 */
 	T get(Supplier<T> factory, UnaryOperator<T> refreshAction) {
+		// 获得 soft reference
 		T value = getValue();
 		if (value == null) {
+			// 传入 T 得到 T
 			value = refreshAction.apply(factory.get());
 			setValue(value);
 		}
+		// 是否过期
 		else if (hasExpired()) {
 			value = refreshAction.apply(value);
 			setValue(value);

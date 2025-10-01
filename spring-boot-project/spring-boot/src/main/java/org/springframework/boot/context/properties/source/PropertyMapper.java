@@ -40,6 +40,11 @@ import org.springframework.core.env.PropertySource;
  */
 interface PropertyMapper {
 
+	// 类名翻译过来：属性映射器
+	// 两个方向的映射：
+	// 1. 将 ConfigurationPropertyName 对象映射成 String (多个)
+	// 2. 将 String 映射成 ConfigurationPropertyName
+
 	/**
 	 * The default ancestor of check.
 	 */

@@ -51,6 +51,7 @@ final class DefaultPropertyMapper implements PropertyMapper {
 	@Override
 	public List<String> map(ConfigurationPropertyName configurationPropertyName) {
 		// Use a local copy in case another thread changes things
+		// 本地缓存，避免连续多次解析
 		LastMapping<ConfigurationPropertyName, List<String>> last = this.lastMappedConfigurationPropertyName;
 		if (last != null && last.isFrom(configurationPropertyName)) {
 			return last.getMapping();

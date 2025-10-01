@@ -566,9 +566,20 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 	 * @return
 	 */
 	private String buildToString() {
+		// 每个元素只能是 UNIFORM 或者 DASHED
+		// --> 等价于元素必须只能包含 0-9 a-z 以及 -
 		if (this.elements.canShortcutWithSource(ElementType.UNIFORM, ElementType.DASHED)) {
+			// 如果满足这样的条件，直接取所有元素组成的 source
+			// 这是一个快捷路径
 			return this.elements.getSource().toString();
 		}
+
+		// 接下来就是一些更复杂的处理
+
+
+
+
+
 		int elements = getNumberOfElements();
 		StringBuilder result = new StringBuilder(elements * 8);
 		for (int i = 0; i < elements; i++) {
@@ -912,9 +923,15 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 			}
 			for (int i = 0; i < this.size; i++) {
 				ElementType type = this.type[i];
+
+				// 每个元素的 type 必须是 requiredType 或 alternativeType
 				if (type != requiredType && type != alternativeType) {
 					return false;
 				}
+
+				// this.end[i - 1] + 1 == this.start[i] 这意味着两个元素之间只间隔 1 个字符
+				// 例如 foo.bar -> foo 与 bar (间隔 .)
+				//     hosts[0] -> hosts 与 0 间隔 [
 				if (i > 0 && this.end[i - 1] + 1 != this.start[i]) {
 					return false;
 				}

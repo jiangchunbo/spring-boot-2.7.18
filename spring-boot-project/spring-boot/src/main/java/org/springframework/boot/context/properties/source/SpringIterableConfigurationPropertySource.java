@@ -69,7 +69,7 @@ class SpringIterableConfigurationPropertySource extends SpringConfigurationPrope
 	private BiPredicate<ConfigurationPropertyName, ConfigurationPropertyName> getAncestorOfCheck(
 			PropertyMapper[] mappers) {
 		BiPredicate<ConfigurationPropertyName, ConfigurationPropertyName> ancestorOfCheck = mappers[0]
-			.getAncestorOfCheck();
+				.getAncestorOfCheck();
 		for (int i = 1; i < mappers.length; i++) {
 			ancestorOfCheck = ancestorOfCheck.or(mappers[i].getAncestorOfCheck());
 		}
@@ -80,8 +80,7 @@ class SpringIterableConfigurationPropertySource extends SpringConfigurationPrope
 		if (getPropertySource() instanceof MapPropertySource) {
 			try {
 				((MapPropertySource) getPropertySource()).getSource().size();
-			}
-			catch (UnsupportedOperationException ex) {
+			} catch (UnsupportedOperationException ex) {
 				throw new IllegalArgumentException("PropertySource must be fully enumerable");
 			}
 		}
@@ -94,13 +93,20 @@ class SpringIterableConfigurationPropertySource extends SpringConfigurationPrope
 
 	@Override
 	public ConfigurationProperty getConfigurationProperty(ConfigurationPropertyName name) {
+		// 名字肯定不能是 null
 		if (name == null) {
 			return null;
 		}
+
+		// 调用父类 方法，毕竟这个方法只是一个扩展
+		// 父类是一种精准匹配
 		ConfigurationProperty configurationProperty = super.getConfigurationProperty(name);
 		if (configurationProperty != null) {
 			return configurationProperty;
 		}
+
+		// 得到一个 Mappings 映射器，通过 name 获取其属性
+		// Set<String>
 		for (String candidate : getMappings().getMapped(name)) {
 			Object value = getPropertySource().getProperty(candidate);
 			if (value != null) {
@@ -147,7 +153,7 @@ class SpringIterableConfigurationPropertySource extends SpringConfigurationPrope
 		ConfigurationPropertyName[] configurationPropertyNames = this.configurationPropertyNames;
 		if (configurationPropertyNames == null) {
 			configurationPropertyNames = getMappings()
-				.getConfigurationPropertyNames(getPropertySource().getPropertyNames());
+					.getConfigurationPropertyNames(getPropertySource().getPropertyNames());
 			this.configurationPropertyNames = configurationPropertyNames;
 		}
 		return configurationPropertyNames;
@@ -157,11 +163,18 @@ class SpringIterableConfigurationPropertySource extends SpringConfigurationPrope
 		return this.cache.get(this::createMappings, this::updateMappings);
 	}
 
+	/**
+	 * 从 cache 中获取的 createMappings 函数
+	 */
 	private Mappings createMappings() {
+		// Mappings 类里面包含 mappings (Map)
 		return new Mappings(getMappers(), isImmutablePropertySource(),
 				this.ancestorOfCheck == PropertyMapper.DEFAULT_ANCESTOR_OF_CHECK);
 	}
 
+	/**
+	 * 从 cache 中获取的 updateMappings 函数
+	 */
 	private Mappings updateMappings(Mappings mappings) {
 		mappings.updateMappings(getPropertySource()::getPropertyNames);
 		return mappings;
@@ -216,8 +229,7 @@ class SpringIterableConfigurationPropertySource extends SpringConfigurationPrope
 					try {
 						updateMappings(propertyNames.get());
 						return;
-					}
-					catch (ConcurrentModificationException ex) {
+					} catch (ConcurrentModificationException ex) {
 						if (count++ > 10) {
 							throw ex;
 						}
@@ -263,7 +275,7 @@ class SpringIterableConfigurationPropertySource extends SpringConfigurationPrope
 		}
 
 		private void addParents(Map<ConfigurationPropertyName, Set<ConfigurationPropertyName>> descendants,
-				ConfigurationPropertyName name) {
+								ConfigurationPropertyName name) {
 			ConfigurationPropertyName parent = name;
 			while (!parent.isEmpty()) {
 				add(descendants, parent, name);
@@ -276,6 +288,7 @@ class SpringIterableConfigurationPropertySource extends SpringConfigurationPrope
 		}
 
 		Set<String> getMapped(ConfigurationPropertyName configurationPropertyName) {
+			// mappings 一个 LinkedHashMap 结构
 			return this.mappings.getOrDefault(configurationPropertyName, Collections.emptySet());
 		}
 
@@ -296,7 +309,7 @@ class SpringIterableConfigurationPropertySource extends SpringConfigurationPrope
 		}
 
 		ConfigurationPropertyState containsDescendantOf(ConfigurationPropertyName name,
-				BiPredicate<ConfigurationPropertyName, ConfigurationPropertyName> ancestorOfCheck) {
+														BiPredicate<ConfigurationPropertyName, ConfigurationPropertyName> ancestorOfCheck) {
 			if (name.isEmpty() && !this.descendants.isEmpty()) {
 				return ConfigurationPropertyState.PRESENT;
 			}
