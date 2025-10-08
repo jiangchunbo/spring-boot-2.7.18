@@ -60,6 +60,9 @@ class SpringConfigurationPropertySource implements ConfigurationPropertySource {
 	private static final PropertyMapper[] SYSTEM_ENVIRONMENT_MAPPERS = {SystemEnvironmentPropertyMapper.INSTANCE,
 			DefaultPropertyMapper.INSTANCE};
 
+	/**
+	 * 将 PropertySource 包装成 SpringConfigurationPropertySource
+	 */
 	private final PropertySource<?> propertySource;
 
 	private final PropertyMapper[] mappers;
@@ -82,6 +85,9 @@ class SpringConfigurationPropertySource implements ConfigurationPropertySource {
 		if (name == null) {
 			return null;
 		}
+
+		// mappers 个数 1 个或 2 个，得看是否是 System
+
 		for (PropertyMapper mapper : this.mappers) {
 			try {
 				for (String candidate : mapper.map(name)) {

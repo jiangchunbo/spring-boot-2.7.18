@@ -243,6 +243,8 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 	 * @since 2.5.0
 	 */
 	public ConfigurationPropertyName append(ConfigurationPropertyName suffix) {
+		// 这个方法可以用于添加前缀
+
 		if (suffix == null) {
 			return this;
 		}
@@ -554,6 +556,8 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 
 	@Override
 	public String toString() {
+		// toString 方法被重写，得到一个规范化的名字
+
 		if (this.string == null) {
 			this.string = buildToString();
 		}
@@ -562,8 +566,6 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 
 	/**
 	 * 用于 toString 获取属性的名字
-	 *
-	 * @return
 	 */
 	private String buildToString() {
 		// 每个元素只能是 UNIFORM 或者 DASHED
@@ -576,22 +578,26 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 
 		// 接下来就是一些更复杂的处理
 
-
-
-
-
+		// elements.size()
 		int elements = getNumberOfElements();
 		StringBuilder result = new StringBuilder(elements * 8);
 		for (int i = 0; i < elements; i++) {
 			boolean indexed = isIndexed(i);
+
+			// 特别好理解，每个 element 之前都要加一个 .
+			// 但是，数字索引除外(因为人家用 [)
 			if (result.length() > 0 && !indexed) {
 				result.append('.');
 			}
+
+			// 如果是数字索引，添加 [i]
 			if (indexed) {
 				result.append('[');
 				result.append(getElement(i, Form.ORIGINAL));
 				result.append(']');
-			} else {
+			}
+			// 其他元素就是追加 DASHED 格式的字符
+			else {
 				result.append(getElement(i, Form.DASHED));
 			}
 		}
@@ -824,14 +830,22 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 		}
 
 		Elements append(Elements additional) {
+			// 计算出新的 size
 			int size = this.size + additional.size;
+			// 给新的 size 申请数组空间
 			ElementType[] type = new ElementType[size];
+
+			// 使用 System.arraycopy 拷贝到新空间
 			System.arraycopy(this.type, 0, type, 0, this.size);
 			System.arraycopy(additional.type, 0, type, this.size, additional.size);
+
+			// 分配一些用于存储字符串的数组，有可能得到一堆全是 null 元素的数组
 			CharSequence[] resolved = newResolved(size);
+			// 遍历 additional，调用每个位置的 get(i) 方法解析字符串
 			for (int i = 0; i < additional.size; i++) {
 				resolved[this.size + i] = additional.get(i);
 			}
+			// ??? 最终数组可能是一个前一部分都是 null，后部分是解析好的
 			return new Elements(this.source, size, this.start, this.end, type, resolved);
 		}
 
@@ -865,9 +879,12 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 		}
 
 		CharSequence get(int index) {
+			// 如果这个位置已经解析过了，那么不用解析
 			if (this.resolved != null && this.resolved[index] != null) {
 				return this.resolved[index];
 			}
+
+			// 否则，subSequence 截取
 			int start = this.start[index];
 			int end = this.end[index];
 			return this.source.subSequence(start, end);
@@ -965,6 +982,9 @@ public final class ConfigurationPropertyName implements Comparable<Configuration
 
 		private ElementType[] type;
 
+		/**
+		 * 解析的结果，最终会交给 Elements
+		 */
 		private CharSequence[] resolved;
 
 		ElementsParser(CharSequence source, char separator) {

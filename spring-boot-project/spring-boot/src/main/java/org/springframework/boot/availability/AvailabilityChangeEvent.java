@@ -89,6 +89,8 @@ public class AvailabilityChangeEvent<S extends AvailabilityState> extends Payloa
 	public static <S extends AvailabilityState> void publish(ApplicationEventPublisher publisher, Object source,
 			S state) {
 		Assert.notNull(publisher, "Publisher must not be null");
+
+		// 发布一个可用性更改的事件，比如 应用允许接受流量、应用拒绝接受流量
 		publisher.publishEvent(new AvailabilityChangeEvent<>(source, state));
 	}
 

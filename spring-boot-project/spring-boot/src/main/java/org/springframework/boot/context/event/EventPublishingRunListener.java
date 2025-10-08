@@ -57,6 +57,9 @@ public class EventPublishingRunListener implements SpringApplicationRunListener,
 
 	private final String[] args;
 
+	/**
+	 * 类型是 SimpleApplicationEventMulticaster 表示这个类不需要扩展，它只是为了支持 Spring Framework 的事件
+	 */
 	private final SimpleApplicationEventMulticaster initialMulticaster;
 
 	public EventPublishingRunListener(SpringApplication application, String[] args) {

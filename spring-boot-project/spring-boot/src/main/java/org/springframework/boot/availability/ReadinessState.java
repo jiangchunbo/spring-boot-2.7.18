@@ -30,11 +30,15 @@ public enum ReadinessState implements AvailabilityState {
 
 	/**
 	 * The application is ready to receive traffic.
+	 * <p>
+	 * 应用实例已经就绪，并且愿意接受外部流量(请求)
 	 */
 	ACCEPTING_TRAFFIC,
 
 	/**
 	 * The application is not willing to receive traffic.
+	 * <p>
+	 * 应用实例目前不愿意接受流量
 	 */
 	REFUSING_TRAFFIC
 

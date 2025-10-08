@@ -33,6 +33,8 @@ class PrefixedConfigurationPropertySource implements ConfigurationPropertySource
 		Assert.notNull(source, "Source must not be null");
 		Assert.hasText(prefix, "Prefix must not be empty");
 		this.source = source;
+
+		// 连 prefix 都包装为一个 ConfigurationPropertyName
 		this.prefix = ConfigurationPropertyName.of(prefix);
 	}
 
@@ -51,6 +53,7 @@ class PrefixedConfigurationPropertySource implements ConfigurationPropertySource
 	}
 
 	private ConfigurationPropertyName getPrefixedName(ConfigurationPropertyName name) {
+		// 将 name 追加到 prefix 后面
 		return this.prefix.append(name);
 	}
 
