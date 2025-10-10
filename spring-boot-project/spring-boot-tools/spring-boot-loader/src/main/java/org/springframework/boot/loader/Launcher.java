@@ -53,10 +53,14 @@ public abstract class Launcher {
 			JarFile.registerUrlProtocolHandler();
 		}
 
-		// 得到一个什么类加载器?
+		// 1. 创建一个 Spring Boot 自己的 LaunchedURLClassLoader 类加载器
 		ClassLoader classLoader = createClassLoader(getClassPathArchivesIterator());
 		String jarMode = System.getProperty("jarmode");
+
+		// 2. 找到应用程序的启用类
 		String launchClass = (jarMode != null && !jarMode.isEmpty()) ? JAR_MODE_LAUNCHER : getMainClass();
+
+		// 3. 将 classLoader 设置为线程上下文类加载器，并运行应用程序的 main(String[])
 		launch(args, launchClass, classLoader);
 	}
 

@@ -193,7 +193,10 @@ public class LaunchedURLClassLoader extends URLClassLoader {
 	private void definePackageIfNecessary(String className) {
 		int lastDot = className.lastIndexOf('.');
 		if (lastDot >= 0) {
+			// 获得 className 所在的 package
 			String packageName = className.substring(0, lastDot);
+
+			// 若没有找到 package，就调用 definePackage
 			if (getPackage(packageName) == null) {
 				try {
 					definePackage(className, packageName);

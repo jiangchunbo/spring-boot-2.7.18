@@ -38,6 +38,9 @@ import org.springframework.boot.loader.archive.ExplodedArchive;
  */
 public abstract class ExecutableArchiveLauncher extends Launcher {
 
+	/**
+	 * JAR 文件中 Manifest Start-Class 属性。其实就是 Spring Boot 的启动类
+	 */
 	private static final String START_CLASS_ATTRIBUTE = "Start-Class";
 
 	protected static final String BOOT_CLASSPATH_INDEX_ATTRIBUTE = "Spring-Boot-Classpath-Index";
