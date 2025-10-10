@@ -52,6 +52,8 @@ public abstract class Launcher {
 		if (!isExploded()) {
 			JarFile.registerUrlProtocolHandler();
 		}
+
+		// 得到一个什么类加载器?
 		ClassLoader classLoader = createClassLoader(getClassPathArchivesIterator());
 		String jarMode = System.getProperty("jarmode");
 		String launchClass = (jarMode != null && !jarMode.isEmpty()) ? JAR_MODE_LAUNCHER : getMainClass();
