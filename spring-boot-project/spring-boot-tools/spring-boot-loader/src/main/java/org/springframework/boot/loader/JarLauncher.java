@@ -32,6 +32,9 @@ import org.springframework.boot.loader.archive.Archive.EntryFilter;
  */
 public class JarLauncher extends ExecutableArchiveLauncher {
 
+	/**
+	 * 用于判断是否是一个嵌套的归档
+	 */
 	static final EntryFilter NESTED_ARCHIVE_ENTRY_FILTER = (entry) -> {
 		if (entry.isDirectory()) {
 			return entry.getName().equals("BOOT-INF/classes/");
@@ -62,6 +65,7 @@ public class JarLauncher extends ExecutableArchiveLauncher {
 	}
 
 	public static void main(String[] args) throws Exception {
+		// 这才是程序启动的 main 方法
 		new JarLauncher().launch(args);
 	}
 

@@ -413,11 +413,15 @@ public class Handler extends URLStreamHandler {
 	 */
 	static void captureJarContextUrl() {
 		if (canResetCachedUrlHandlers()) {
+			// 一般情况下也不会设置，如果设置了就 clear
 			String handlers = System.getProperty(PROTOCOL_HANDLER);
 			try {
 				System.clearProperty(PROTOCOL_HANDLER);
 				try {
+					// 调用 URL.setURLStreamHandlerFactory(null); 把这个处理器也清空
 					resetCachedUrlHandlers();
+
+					// 创建一个特殊的 URL 确保这个 URL 能够使用 JDK 原生的 Jar 处理器
 					jarContextUrl = new URL("jar:file:context.jar!/");
 					URLConnection connection = jarContextUrl.openConnection();
 					if (connection instanceof JarURLConnection) {

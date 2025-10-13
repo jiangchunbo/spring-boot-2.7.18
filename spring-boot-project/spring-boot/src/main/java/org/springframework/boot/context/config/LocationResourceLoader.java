@@ -72,11 +72,20 @@ class LocationResourceLoader {
 	 * @see #isPattern(String)
 	 */
 	Resource getResource(String location) {
+		// 禁止传入 pattern location
 		validateNonPattern(location);
+
+		// 似乎就是一个格式化
 		location = StringUtils.cleanPath(location);
+
+		// 如果不是一个 URL
+		// 什么是 URL? (1) 前缀 classpath: (2) URL 没有语法错误
 		if (!ResourceUtils.isUrl(location)) {
+			// 如果不是 URL 就加 file: 前缀
 			location = ResourceUtils.FILE_URL_PREFIX + location;
 		}
+
+		// 获取 Resource
 		return this.resourceLoader.getResource(location);
 	}
 

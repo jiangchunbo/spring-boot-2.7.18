@@ -99,6 +99,7 @@ public class JarFile extends AbstractJarFile implements Iterable<java.util.jar.J
 	 * @throws IOException if the file cannot be read
 	 */
 	public JarFile(File file) throws IOException {
+		// RandomAccessDataFile 这个也是 spring boot 自己定义的
 		this(new RandomAccessDataFile(file));
 	}
 
@@ -127,12 +128,16 @@ public class JarFile extends AbstractJarFile implements Iterable<java.util.jar.J
 
 	private JarFile(RandomAccessDataFile rootFile, String pathFromRoot, RandomAccessData data, JarEntryFilter filter,
 			JarFileType type, Supplier<Manifest> manifestSupplier) throws IOException {
+		// 调用传统的 JarFile 能力
 		super(rootFile.getFile());
+
 		if (System.getSecurityManager() == null) {
 			super.close();
 		}
 		this.rootFile = rootFile;
 		this.pathFromRoot = pathFromRoot;
+
+		// 构造一个解析器，注册一些 visitor
 		CentralDirectoryParser parser = new CentralDirectoryParser();
 		this.entries = parser.addVisitor(new JarFileEntries(this, filter));
 		this.type = type;
@@ -431,6 +436,8 @@ public class JarFile extends AbstractJarFile implements Iterable<java.util.jar.J
 	 */
 	public static void registerUrlProtocolHandler() {
 		Handler.captureJarContextUrl();
+
+		// 设置 PROTOCOL_HANDLER，目的就是要追加 Spring Boot 自己的 HANDLERS_PACKAGE
 		String handlers = System.getProperty(PROTOCOL_HANDLER, "");
 		System.setProperty(PROTOCOL_HANDLER,
 				((handlers == null || handlers.isEmpty()) ? HANDLERS_PACKAGE : handlers + "|" + HANDLERS_PACKAGE));

@@ -61,7 +61,7 @@ public class StandardConfigDataLocationResolver
 
 	static final String CONFIG_NAME_PROPERTY = "spring.config.name";
 
-	private static final String[] DEFAULT_CONFIG_NAMES = { "application" };
+	private static final String[] DEFAULT_CONFIG_NAMES = {"application"};
 
 	private static final Pattern URL_PREFIX = Pattern.compile("^([a-zA-Z][a-zA-Z0-9*]*?:)(.*$)");
 
@@ -75,12 +75,16 @@ public class StandardConfigDataLocationResolver
 
 	private final String[] configNames;
 
+	/**
+	 * 资源加载器。类型是固定的。
+	 */
 	private final LocationResourceLoader resourceLoader;
 
 	/**
 	 * Create a new {@link StandardConfigDataLocationResolver} instance.
-	 * @param logger the logger to use
-	 * @param binder a binder backed by the initial {@link Environment}
+	 *
+	 * @param logger         the logger to use
+	 * @param binder         a binder backed by the initial {@link Environment}
 	 * @param resourceLoader a {@link ResourceLoader} used to load resources
 	 */
 	public StandardConfigDataLocationResolver(Log logger, Binder binder, ResourceLoader resourceLoader) {
@@ -115,12 +119,12 @@ public class StandardConfigDataLocationResolver
 
 	@Override
 	public List<StandardConfigDataResource> resolve(ConfigDataLocationResolverContext context,
-			ConfigDataLocation location) throws ConfigDataNotFoundException {
+													ConfigDataLocation location) throws ConfigDataNotFoundException {
 		return resolve(getReferences(context, location.split()));
 	}
 
 	private Set<StandardConfigDataReference> getReferences(ConfigDataLocationResolverContext context,
-			ConfigDataLocation[] configDataLocations) {
+														   ConfigDataLocation[] configDataLocations) {
 		Set<StandardConfigDataReference> references = new LinkedHashSet<>();
 		for (ConfigDataLocation configDataLocation : configDataLocations) {
 			references.addAll(getReferences(context, configDataLocation));
@@ -129,27 +133,26 @@ public class StandardConfigDataLocationResolver
 	}
 
 	private Set<StandardConfigDataReference> getReferences(ConfigDataLocationResolverContext context,
-			ConfigDataLocation configDataLocation) {
+														   ConfigDataLocation configDataLocation) {
 		String resourceLocation = getResourceLocation(context, configDataLocation);
 		try {
 			if (isDirectory(resourceLocation)) {
 				return getReferencesForDirectory(configDataLocation, resourceLocation, NO_PROFILE);
 			}
 			return getReferencesForFile(configDataLocation, resourceLocation, NO_PROFILE);
-		}
-		catch (RuntimeException ex) {
+		} catch (RuntimeException ex) {
 			throw new IllegalStateException("Unable to load config data from '" + configDataLocation + "'", ex);
 		}
 	}
 
 	@Override
 	public List<StandardConfigDataResource> resolveProfileSpecific(ConfigDataLocationResolverContext context,
-			ConfigDataLocation location, Profiles profiles) {
+																   ConfigDataLocation location, Profiles profiles) {
 		return resolve(getProfileSpecificReferences(context, location.split(), profiles));
 	}
 
 	private Set<StandardConfigDataReference> getProfileSpecificReferences(ConfigDataLocationResolverContext context,
-			ConfigDataLocation[] configDataLocations, Profiles profiles) {
+																		  ConfigDataLocation[] configDataLocations, Profiles profiles) {
 		Set<StandardConfigDataReference> references = new LinkedHashSet<>();
 		for (String profile : profiles) {
 			for (ConfigDataLocation configDataLocation : configDataLocations) {
@@ -161,7 +164,7 @@ public class StandardConfigDataLocationResolver
 	}
 
 	private String getResourceLocation(ConfigDataLocationResolverContext context,
-			ConfigDataLocation configDataLocation) {
+									   ConfigDataLocation configDataLocation) {
 		String resourceLocation = configDataLocation.getNonPrefixedValue(PREFIX);
 		boolean isAbsolute = resourceLocation.startsWith("/") || URL_PREFIX.matcher(resourceLocation).matches();
 		if (isAbsolute) {
@@ -177,7 +180,7 @@ public class StandardConfigDataLocationResolver
 	}
 
 	private Set<StandardConfigDataReference> getReferences(ConfigDataLocation configDataLocation,
-			String resourceLocation, String profile) {
+														   String resourceLocation, String profile) {
 		if (isDirectory(resourceLocation)) {
 			return getReferencesForDirectory(configDataLocation, resourceLocation, profile);
 		}
@@ -185,7 +188,7 @@ public class StandardConfigDataLocationResolver
 	}
 
 	private Set<StandardConfigDataReference> getReferencesForDirectory(ConfigDataLocation configDataLocation,
-			String directory, String profile) {
+																	   String directory, String profile) {
 		Set<StandardConfigDataReference> references = new LinkedHashSet<>();
 		for (String name : this.configNames) {
 			Deque<StandardConfigDataReference> referencesForName = getReferencesForConfigName(name, configDataLocation,
@@ -196,7 +199,7 @@ public class StandardConfigDataLocationResolver
 	}
 
 	private Deque<StandardConfigDataReference> getReferencesForConfigName(String name,
-			ConfigDataLocation configDataLocation, String directory, String profile) {
+																		  ConfigDataLocation configDataLocation, String directory, String profile) {
 		Deque<StandardConfigDataReference> references = new ArrayDeque<>();
 		for (PropertySourceLoader propertySourceLoader : this.propertySourceLoaders) {
 			for (String extension : propertySourceLoader.getFileExtensions()) {
@@ -211,7 +214,7 @@ public class StandardConfigDataLocationResolver
 	}
 
 	private Set<StandardConfigDataReference> getReferencesForFile(ConfigDataLocation configDataLocation, String file,
-			String profile) {
+																  String profile) {
 		Matcher extensionHintMatcher = EXTENSION_HINT_PATTERN.matcher(file);
 		boolean extensionHintLocation = extensionHintMatcher.matches();
 		if (extensionHintLocation) {
@@ -248,9 +251,13 @@ public class StandardConfigDataLocationResolver
 
 	private List<StandardConfigDataResource> resolve(Set<StandardConfigDataReference> references) {
 		List<StandardConfigDataResource> resolved = new ArrayList<>();
+		// 将一些模糊的引用，例如可能包含 pattern 解析为确定的引用
 		for (StandardConfigDataReference reference : references) {
+			// addAll 表示可能返回多个元素
 			resolved.addAll(resolve(reference));
 		}
+
+		// 如果解析结果是空，那么就尝试解析目录？
 		if (resolved.isEmpty()) {
 			resolved.addAll(resolveEmptyDirectories(references));
 		}
@@ -276,7 +283,11 @@ public class StandardConfigDataLocationResolver
 	}
 
 	private Set<StandardConfigDataResource> resolveNonPatternEmptyDirectories(StandardConfigDataReference reference) {
+		// 目录，也是一种 Resource
 		Resource resource = this.resourceLoader.getResource(reference.getDirectory());
+
+		// 如果是 ClassPathResource，并不能解析这种目录，所以放弃解析
+		// 如果根本不存在，也放弃
 		return (resource instanceof ClassPathResource || !resource.exists()) ? Collections.emptySet()
 				: Collections.singleton(new StandardConfigDataResource(reference, resource, true));
 	}
@@ -289,19 +300,31 @@ public class StandardConfigDataLocationResolver
 			throw new ConfigDataLocationNotFoundException(location, message, null);
 		}
 		return Arrays.stream(subdirectories)
-			.filter(Resource::exists)
-			.map((resource) -> new StandardConfigDataResource(reference, resource, true))
-			.collect(Collectors.toCollection(LinkedHashSet::new));
+				.filter(Resource::exists)
+				.map((resource) -> new StandardConfigDataResource(reference, resource, true))
+				.collect(Collectors.toCollection(LinkedHashSet::new));
 	}
 
 	private List<StandardConfigDataResource> resolve(StandardConfigDataReference reference) {
+		// 如果是具体的资源引用，那么直接 resolveNonPattern
+		// 例如 file:./config/application.yml
 		if (!this.resourceLoader.isPattern(reference.getResourceLocation())) {
+			// 其实固定 1 个
 			return resolveNonPattern(reference);
 		}
+
+		// 如果是 pattern 引用，那么需要解析一次，可能多个
 		return resolvePattern(reference);
 	}
 
+	/**
+	 * 解析一个确定 location 的资源
+	 *
+	 * @param reference 引用
+	 * @return (1) 空 List (2) 仅包含 1 个元素的 List
+	 */
 	private List<StandardConfigDataResource> resolveNonPattern(StandardConfigDataReference reference) {
+		// 给定 location 获取资源
 		Resource resource = this.resourceLoader.getResource(reference.getResourceLocation());
 		if (!resource.exists() && reference.isSkippable()) {
 			logSkippingResource(reference);
@@ -313,9 +336,12 @@ public class StandardConfigDataLocationResolver
 	private List<StandardConfigDataResource> resolvePattern(StandardConfigDataReference reference) {
 		List<StandardConfigDataResource> resolved = new ArrayList<>();
 		for (Resource resource : this.resourceLoader.getResources(reference.getResourceLocation(), ResourceType.FILE)) {
+			// 如果资源不存在，但是资源是 optional 之类的，那么记录一下日志
 			if (!resource.exists() && reference.isSkippable()) {
 				logSkippingResource(reference);
 			}
+			// 如果资源不存在，但是资源 required，似乎也添加进去了
+			// 如果资源存在，添加进去
 			else {
 				resolved.add(createConfigResourceLocation(reference, resource));
 			}
@@ -328,7 +354,7 @@ public class StandardConfigDataLocationResolver
 	}
 
 	private StandardConfigDataResource createConfigResourceLocation(StandardConfigDataReference reference,
-			Resource resource) {
+																	Resource resource) {
 		return new StandardConfigDataResource(reference, resource);
 	}
 

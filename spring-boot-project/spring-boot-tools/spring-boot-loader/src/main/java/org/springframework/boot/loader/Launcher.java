@@ -49,6 +49,7 @@ public abstract class Launcher {
 	 * @throws Exception if the application fails to launch
 	 */
 	protected void launch(String[] args) throws Exception {
+		// 如果不是暴露出来的，也就是打包到 jar 里面的，就需要注册 jar 文件协议处理器
 		if (!isExploded()) {
 			JarFile.registerUrlProtocolHandler();
 		}
@@ -155,17 +156,31 @@ public abstract class Launcher {
 	}
 
 	protected final Archive createArchive() throws Exception {
+		// 准确来说是获取当前类 Launcher，或者更具体来说是实现类，例如 JarLauncher 的一组安全相关信息
 		ProtectionDomain protectionDomain = getClass().getProtectionDomain();
+
+		// 获取类的来源信息，最核心的是一个 URL 表示的 Location，还有可选的签名证书链
 		CodeSource codeSource = protectionDomain.getCodeSource();
+
+		// codeSource.getLocation() 通常用于确定某个类是从哪个 JAR 或目录加载的
 		URI location = (codeSource != null) ? codeSource.getLocation().toURI() : null;
+
+		// 对于文件系统来说，其实就是获取文件路径
 		String path = (location != null) ? location.getSchemeSpecificPart() : null;
 		if (path == null) {
 			throw new IllegalStateException("Unable to determine code source archive");
 		}
+
+		// ===> 其实也可以通过 location URI 构造 File ==> new File(location)
+
+		// 构造 File
 		File root = new File(path);
 		if (!root.exists()) {
 			throw new IllegalStateException("Unable to determine code source archive from " + root);
 		}
+
+		// 如果 path 指向一个目录 -> 使用 ExplodedArchive
+		// 否则 (通常是 jar 文件) -> 使用 JarFileArchive
 		return (root.isDirectory() ? new ExplodedArchive(root) : new JarFileArchive(root));
 	}
 
