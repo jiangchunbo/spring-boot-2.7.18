@@ -35,6 +35,8 @@ import org.springframework.format.FormatterRegistry;
 /**
  * Utility to deduce the {@link ConversionService} to use for configuration properties
  * binding.
+ * <p>
+ * ConversionService 推断器
  *
  * @author Phillip Webb
  */
@@ -47,9 +49,10 @@ class ConversionServiceDeducer {
 	}
 
 	List<ConversionService> getConversionServices() {
+		// 如果已经定义了 ConversionService Bean，那么直接用就行了
 		if (hasUserDefinedConfigurationServiceBean()) {
 			return Collections.singletonList(this.applicationContext
-				.getBean(ConfigurableApplicationContext.CONVERSION_SERVICE_BEAN_NAME, ConversionService.class));
+					.getBean(ConfigurableApplicationContext.CONVERSION_SERVICE_BEAN_NAME, ConversionService.class));
 		}
 		if (this.applicationContext instanceof ConfigurableApplicationContext) {
 			return getConversionServices((ConfigurableApplicationContext) this.applicationContext);
@@ -72,9 +75,10 @@ class ConversionServiceDeducer {
 	}
 
 	private boolean hasUserDefinedConfigurationServiceBean() {
+		// 检查是否包含一个名字是 conversionService，而且类型是 ConversionService 的 bean
 		String beanName = ConfigurableApplicationContext.CONVERSION_SERVICE_BEAN_NAME;
 		return this.applicationContext.containsBean(beanName) && this.applicationContext.getAutowireCapableBeanFactory()
-			.isTypeMatch(beanName, ConversionService.class);
+				.isTypeMatch(beanName, ConversionService.class);
 	}
 
 	private static class ConverterBeans {

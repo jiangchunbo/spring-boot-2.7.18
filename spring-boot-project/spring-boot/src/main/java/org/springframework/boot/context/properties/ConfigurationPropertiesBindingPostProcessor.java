@@ -65,6 +65,8 @@ public class ConfigurationPropertiesBindingPostProcessor
 		// We can't use constructor injection of the application context because
 		// it causes eager factory bean initialization
 		this.registry = (BeanDefinitionRegistry) this.applicationContext.getAutowireCapableBeanFactory();
+
+		// 这是一种巧妙的方式，从容器获取 Bean
 		this.binder = ConfigurationPropertiesBinder.get(this.applicationContext);
 	}
 
@@ -73,6 +75,9 @@ public class ConfigurationPropertiesBindingPostProcessor
 		return Ordered.HIGHEST_PRECEDENCE + 1;
 	}
 
+	/**
+	 * 实例化后。重点看这个，如何绑定属性。
+	 */
 	@Override
 	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 		// 得到一个 ConfigurationPropertiesBean 对象，然后执行 bind
@@ -103,7 +108,7 @@ public class ConfigurationPropertiesBindingPostProcessor
 	/**
 	 * Register a {@link ConfigurationPropertiesBindingPostProcessor} bean if one is not
 	 * already registered.
-	 *
+	 * <p>
 	 * 向 bean factory 注册 ConfigurationPropertiesBindingPostProcessor
 	 *
 	 * @param registry the bean definition registry
@@ -112,8 +117,7 @@ public class ConfigurationPropertiesBindingPostProcessor
 	public static void register(BeanDefinitionRegistry registry) {
 		Assert.notNull(registry, "Registry must not be null");
 
-		// beanName = ConfigurationPropertiesBindingPostProcessor.class.getName()
-
+		// 注册 ConfigurationPropertiesBindingPostProcessor 后置处理。帮属性 bean 绑定属性
 		if (!registry.containsBeanDefinition(BEAN_NAME)) {
 			BeanDefinition definition = BeanDefinitionBuilder
 					.rootBeanDefinition(ConfigurationPropertiesBindingPostProcessor.class)
@@ -121,6 +125,8 @@ public class ConfigurationPropertiesBindingPostProcessor
 			definition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			registry.registerBeanDefinition(BEAN_NAME, definition);
 		}
+
+		// 主要就是注册一个 ConfigurationPropertiesBinder
 		ConfigurationPropertiesBinder.register(registry);
 	}
 

@@ -195,6 +195,9 @@ public class SpringApplication {
 	 */
 	private boolean addCommandLineProperties = true;
 
+	/**
+	 * 是否添加转换器服务
+	 */
 	private boolean addConversionService = true;
 
 	private Banner banner;
@@ -705,6 +708,7 @@ public class SpringApplication {
 	 * @param context the application context
 	 */
 	protected void postProcessApplicationContext(ConfigurableApplicationContext context) {
+		// 注册单例 bean —— BeanNameGenerator
 		if (this.beanNameGenerator != null) {
 			context.getBeanFactory().registerSingleton(AnnotationConfigUtils.CONFIGURATION_BEAN_NAME_GENERATOR, this.beanNameGenerator);
 		}

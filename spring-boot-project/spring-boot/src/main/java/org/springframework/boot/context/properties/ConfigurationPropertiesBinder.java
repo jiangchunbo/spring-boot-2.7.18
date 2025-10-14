@@ -240,8 +240,11 @@ class ConfigurationPropertiesBinder {
 	 */
 	private Binder getBinder() {
 		if (this.binder == null) {
-			this.binder = new Binder(getConfigurationPropertySources(), getPropertySourcesPlaceholdersResolver(),
-					getConversionServices(), getPropertyEditorInitializer(), null,
+			this.binder = new Binder(getConfigurationPropertySources(),  // 属性源
+					getPropertySourcesPlaceholdersResolver(),
+					getConversionServices(),
+					getPropertyEditorInitializer(),
+					null,
 					ConfigurationPropertiesBindConstructorProvider.INSTANCE);
 		}
 		return this.binder;
@@ -256,6 +259,7 @@ class ConfigurationPropertiesBinder {
 	}
 
 	private List<ConversionService> getConversionServices() {
+		// 推断得到 List<ConversionService>
 		return new ConversionServiceDeducer(this.applicationContext).getConversionServices();
 	}
 
@@ -272,6 +276,8 @@ class ConfigurationPropertiesBinder {
 	 * @param registry BeanDefinitionRegistry
 	 */
 	static void register(BeanDefinitionRegistry registry) {
+		// 这两个 bean 紧密连接。第一个 Bean 是工厂，第二个 Bean 由第一个 Bean 生产
+
 		if (!registry.containsBeanDefinition(FACTORY_BEAN_NAME)) {
 			BeanDefinition definition = BeanDefinitionBuilder
 					.rootBeanDefinition(ConfigurationPropertiesBinder.Factory.class)
@@ -279,12 +285,15 @@ class ConfigurationPropertiesBinder {
 			definition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			registry.registerBeanDefinition(ConfigurationPropertiesBinder.FACTORY_BEAN_NAME, definition);
 		}
+
+		// 这种 Bean 使用的是 Supplier 实例化方式，实例化通过上面的 Factory 方法 create()
 		if (!registry.containsBeanDefinition(BEAN_NAME)) {
 			BeanDefinition definition = BeanDefinitionBuilder
 					.rootBeanDefinition(ConfigurationPropertiesBinder.class,
-							() -> ((BeanFactory) registry)
-									.getBean(FACTORY_BEAN_NAME, ConfigurationPropertiesBinder.Factory.class)
-									.create())
+							() -> // 这是一个 Supplier 创建实例的方式，通过上面的 Factory 方法 create()
+									((BeanFactory) registry)
+											.getBean(FACTORY_BEAN_NAME, ConfigurationPropertiesBinder.Factory.class)
+											.create())
 					.getBeanDefinition();
 			definition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			registry.registerBeanDefinition(ConfigurationPropertiesBinder.BEAN_NAME, definition);

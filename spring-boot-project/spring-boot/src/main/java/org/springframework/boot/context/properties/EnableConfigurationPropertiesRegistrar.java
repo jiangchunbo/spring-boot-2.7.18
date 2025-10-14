@@ -43,7 +43,7 @@ class EnableConfigurationPropertiesRegistrar implements ImportBeanDefinitionRegi
 
 	@Override
 	public void registerBeanDefinitions(AnnotationMetadata metadata, BeanDefinitionRegistry registry) {
-		// 注册一些 bean 包括后置处理器
+		// 注册一些组件，其中包括 BeanPostProcessor
 		registerInfrastructureBeans(registry);
 
 		// 2. 注册 ConfigurationPropertiesBeanRegistrar 用于排除 Validation 的校验
@@ -70,8 +70,7 @@ class EnableConfigurationPropertiesRegistrar implements ImportBeanDefinitionRegi
 	}
 
 	static void registerInfrastructureBeans(BeanDefinitionRegistry registry) {
-		// 注册 ConfigurationPropertiesBindingPostProcessor
-		// 注册 ConfigurationPropertiesBinder
+		// 注册后置处理器，给属性 Bean 赋值
 		ConfigurationPropertiesBindingPostProcessor.register(registry);
 
 		// 注册 BoundConfigurationProperties

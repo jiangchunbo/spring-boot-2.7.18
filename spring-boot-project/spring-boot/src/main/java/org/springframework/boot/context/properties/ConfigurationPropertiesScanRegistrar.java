@@ -47,6 +47,8 @@ import org.springframework.util.StringUtils;
  */
 class ConfigurationPropertiesScanRegistrar implements ImportBeanDefinitionRegistrar {
 
+	// 这是一种扫描的方案，扫描带有注解 @ConfigurationProperties 的类，并注册
+
 	private final Environment environment;
 
 	private final ResourceLoader resourceLoader;
@@ -58,30 +60,48 @@ class ConfigurationPropertiesScanRegistrar implements ImportBeanDefinitionRegist
 
 	@Override
 	public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
+		// 从注解中获取需要扫描的包
 		Set<String> packagesToScan = getPackagesToScan(importingClassMetadata);
+
+		// bean factory + packages 传参修改
 		scan(registry, packagesToScan);
 	}
 
 	private Set<String> getPackagesToScan(AnnotationMetadata metadata) {
+		// 从一个 Map 结构解析出 AnnotationAttributes
 		AnnotationAttributes attributes = AnnotationAttributes
-			.fromMap(metadata.getAnnotationAttributes(ConfigurationPropertiesScan.class.getName()));
+				.fromMap(metadata.getAnnotationAttributes(ConfigurationPropertiesScan.class.getName()));
+
+		// 硬编码找到 basePackage
 		String[] basePackages = attributes.getStringArray("basePackages");
 		Class<?>[] basePackageClasses = attributes.getClassArray("basePackageClasses");
+
+		// String[] 类型的 basePackages 直接放到初始的 Set 中
 		Set<String> packagesToScan = new LinkedHashSet<>(Arrays.asList(basePackages));
+		// 遍历 basePackageClasses 这些类型，获取他们的包
 		for (Class<?> basePackageClass : basePackageClasses) {
 			packagesToScan.add(ClassUtils.getPackageName(basePackageClass));
 		}
+
+		// 如果都没有设置，就使用注解所在的 package name
 		if (packagesToScan.isEmpty()) {
 			packagesToScan.add(ClassUtils.getPackageName(metadata.getClassName()));
 		}
+
+		// 删除一些空文本
 		packagesToScan.removeIf((candidate) -> !StringUtils.hasText(candidate));
 		return packagesToScan;
 	}
 
 	private void scan(BeanDefinitionRegistry registry, Set<String> packages) {
 		ConfigurationPropertiesBeanRegistrar registrar = new ConfigurationPropertiesBeanRegistrar(registry);
+
+		// 获得核心扫描器
 		ClassPathScanningCandidateComponentProvider scanner = getScanner(registry);
+
+		// 很简单，遍历一些 package:String
 		for (String basePackage : packages) {
+			// 通过组件的支持，扫描得到一些 BeanDefinition
 			for (BeanDefinition candidate : scanner.findCandidateComponents(basePackage)) {
 				register(registrar, candidate.getBeanClassName());
 			}
@@ -92,9 +112,13 @@ class ConfigurationPropertiesScanRegistrar implements ImportBeanDefinitionRegist
 		ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(false);
 		scanner.setEnvironment(this.environment);
 		scanner.setResourceLoader(this.resourceLoader);
+
+		// 比较关键，添加一个基于注解的过滤器，关注 @ConfigurationProperties
 		scanner.addIncludeFilter(new AnnotationTypeFilter(ConfigurationProperties.class));
+
+		// 关键，添加一个排除过滤器
 		TypeExcludeFilter typeExcludeFilter = new TypeExcludeFilter();
-		typeExcludeFilter.setBeanFactory((BeanFactory) registry);
+		typeExcludeFilter.setBeanFactory((BeanFactory) registry); // 为什么这里
 		scanner.addExcludeFilter(typeExcludeFilter);
 		return scanner;
 	}
@@ -102,18 +126,24 @@ class ConfigurationPropertiesScanRegistrar implements ImportBeanDefinitionRegist
 	private void register(ConfigurationPropertiesBeanRegistrar registrar, String className) throws LinkageError {
 		try {
 			register(registrar, ClassUtils.forName(className, null));
-		}
-		catch (ClassNotFoundException ex) {
+		} catch (ClassNotFoundException ex) {
 			// Ignore
 		}
 	}
 
 	private void register(ConfigurationPropertiesBeanRegistrar registrar, Class<?> type) {
+		// 如果没有 @Component 注解才可以注解
 		if (!isComponent(type)) {
 			registrar.register(type);
 		}
 	}
 
+	/**
+	 * 简单判断是否有注解 @Component
+	 *
+	 * @param type 类型
+	 * @return 是否是 Component
+	 */
 	private boolean isComponent(Class<?> type) {
 		return MergedAnnotations.from(type, SearchStrategy.TYPE_HIERARCHY).isPresent(Component.class);
 	}
