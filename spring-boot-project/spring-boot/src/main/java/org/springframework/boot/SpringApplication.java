@@ -453,7 +453,7 @@ public class SpringApplication {
 		// 设置一些对象
 		postProcessApplicationContext(context);
 
-		// ApplicationContextInitializer 全都调用一遍
+		// 调用所有初始化器
 		applyInitializers(context);
 
 		// 📢 spring application run -> contextPrepared
@@ -712,6 +712,8 @@ public class SpringApplication {
 		if (this.beanNameGenerator != null) {
 			context.getBeanFactory().registerSingleton(AnnotationConfigUtils.CONFIGURATION_BEAN_NAME_GENERATOR, this.beanNameGenerator);
 		}
+
+		// 给 Context 注入属性
 		if (this.resourceLoader != null) {
 			if (context instanceof GenericApplicationContext) {
 				((GenericApplicationContext) context).setResourceLoader(this.resourceLoader);
@@ -720,6 +722,8 @@ public class SpringApplication {
 				((DefaultResourceLoader) context).setClassLoader(this.resourceLoader.getClassLoader());
 			}
 		}
+
+		// 给 BeanFactory 注入转换服务
 		if (this.addConversionService) {
 			context.getBeanFactory().setConversionService(context.getEnvironment().getConversionService());
 		}
@@ -734,9 +738,13 @@ public class SpringApplication {
 	 */
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	protected void applyInitializers(ConfigurableApplicationContext context) {
+		// 获取所有的 Context 初始化器，调用初始化方法
 		for (ApplicationContextInitializer initializer : getInitializers()) {
+			// 解析类型参数，因为 ApplicationContextInitializer 带有类型参数，所以需要检查实现类是否指定了具体类型
 			Class<?> requiredType = GenericTypeResolver.resolveTypeArgument(initializer.getClass(), ApplicationContextInitializer.class);
 			Assert.isInstanceOf(requiredType, context, "Unable to call initializer.");
+
+			// 调用初始化器
 			initializer.initialize(context);
 		}
 	}

@@ -44,6 +44,9 @@ public class DelegatingApplicationContextInitializer
 
 	// NOTE: Similar to org.springframework.web.context.ContextLoader
 
+	/**
+	 * 特殊的属性值，存储于 Environment 之中
+	 */
 	private static final String PROPERTY_NAME = "context.initializer.classes";
 
 	private int order = 0;
@@ -51,7 +54,11 @@ public class DelegatingApplicationContextInitializer
 	@Override
 	public void initialize(ConfigurableApplicationContext context) {
 		ConfigurableEnvironment environment = context.getEnvironment();
+
+		// 将属性转换为一些类型
 		List<Class<?>> initializerClasses = getInitializerClasses(environment);
+
+		// 立即调用这些初始化器
 		if (!initializerClasses.isEmpty()) {
 			applyInitializerClasses(context, initializerClasses);
 		}
@@ -83,8 +90,11 @@ public class DelegatingApplicationContextInitializer
 		Class<?> contextClass = context.getClass();
 		List<ApplicationContextInitializer<?>> initializers = new ArrayList<>();
 		for (Class<?> initializerClass : initializerClasses) {
+			// 实例化 ApplicationContextInitializer
 			initializers.add(instantiateInitializer(contextClass, initializerClass));
 		}
+
+		// 立即调用这些初始化器
 		applyInitializers(context, initializers);
 	}
 

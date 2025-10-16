@@ -40,6 +40,9 @@ import org.springframework.util.StringUtils;
 public class ContextIdApplicationContextInitializer
 		implements ApplicationContextInitializer<ConfigurableApplicationContext>, Ordered {
 
+	// 尽管叫 ContextID 但是并不是多个实例使用不同 ID，仅仅将 spring.application.name 作为 ID
+	// 所以，集群内的每个实例都表现出相同的 ID
+
 	private int order = Ordered.LOWEST_PRECEDENCE - 10;
 
 	public void setOrder(int order) {
@@ -60,6 +63,8 @@ public class ContextIdApplicationContextInitializer
 
 	private ContextId getContextId(ConfigurableApplicationContext applicationContext) {
 		ApplicationContext parent = applicationContext.getParent();
+
+		// 如果存在 parent，则调用它们的 createChildId 方法（带有一个后缀）
 		if (parent != null && parent.containsBean(ContextId.class.getName())) {
 			return parent.getBean(ContextId.class).createChildId();
 		}

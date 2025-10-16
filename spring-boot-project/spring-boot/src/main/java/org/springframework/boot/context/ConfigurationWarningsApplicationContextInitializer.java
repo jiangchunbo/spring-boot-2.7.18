@@ -56,6 +56,7 @@ public class ConfigurationWarningsApplicationContextInitializer
 
 	@Override
 	public void initialize(ConfigurableApplicationContext context) {
+		// 添加了 BeanDefinitionRegistryPostProcessor --> 处理 BeanFactory
 		context.addBeanFactoryPostProcessor(new ConfigurationWarningsPostProcessor(getChecks()));
 	}
 
@@ -127,6 +128,9 @@ public class ConfigurationWarningsApplicationContextInitializer
 	 */
 	protected static class ComponentScanPackageCheck implements Check {
 
+		/**
+		 * 绝对不能扫描这几个包
+		 */
 		private static final Set<String> PROBLEM_PACKAGES;
 
 		static {
@@ -149,9 +153,13 @@ public class ConfigurationWarningsApplicationContextInitializer
 
 		protected Set<String> getComponentScanningPackages(BeanDefinitionRegistry registry) {
 			Set<String> packages = new LinkedHashSet<>();
+
+			// 获取所有 bean definition name
 			String[] names = registry.getBeanDefinitionNames();
 			for (String name : names) {
 				BeanDefinition definition = registry.getBeanDefinition(name);
+
+				// 把 @ComponentScan 注解指示的 basePackage 收集到 packages 中
 				if (definition instanceof AnnotatedBeanDefinition) {
 					AnnotatedBeanDefinition annotatedDefinition = (AnnotatedBeanDefinition) definition;
 					addComponentScanningPackages(packages, annotatedDefinition.getMetadata());
@@ -161,12 +169,19 @@ public class ConfigurationWarningsApplicationContextInitializer
 		}
 
 		private void addComponentScanningPackages(Set<String> packages, AnnotationMetadata metadata) {
+			// 获取 @ComponentScan 注解属性
 			AnnotationAttributes attributes = AnnotationAttributes
 				.fromMap(metadata.getAnnotationAttributes(ComponentScan.class.getName(), true));
 			if (attributes != null) {
+				// 这里 add 的顺序，体现了 basePackage 决策的顺序
+
+				// 1. 检查 value
 				addPackages(packages, attributes.getStringArray("value"));
+				// 2. 检查 basePackages
 				addPackages(packages, attributes.getStringArray("basePackages"));
+				// 3. 检查 basePackageClasses
 				addClasses(packages, attributes.getStringArray("basePackageClasses"));
+				// 4. 如果未配置注解属性，则使用所在包
 				if (packages.isEmpty()) {
 					packages.add(ClassUtils.getPackageName(metadata.getClassName()));
 				}
@@ -197,6 +212,9 @@ public class ConfigurationWarningsApplicationContextInitializer
 			return problematicPackages;
 		}
 
+		/**
+		 * 什么是有问题的包
+		 */
 		private boolean isProblematicPackage(String scannedPackage) {
 			if (scannedPackage == null || scannedPackage.isEmpty()) {
 				return true;

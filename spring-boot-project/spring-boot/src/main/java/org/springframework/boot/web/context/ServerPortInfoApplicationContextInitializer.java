@@ -91,12 +91,16 @@ public class ServerPortInfoApplicationContextInitializer implements
 		MutablePropertySources sources = environment.getPropertySources();
 
 		// 检查是否有名字叫 "server.ports" 的 PropertySource (一般都是没有的)
+		// 这个属性源就是专门存各种端口的
 		PropertySource<?> source = sources.get("server.ports");
 		if (source == null) {
 			// 自己创建一个，然后 addFirst 提高优先级，插入到最前面
 			source = new MapPropertySource("server.ports", new HashMap<>());
 			sources.addFirst(source);
 		}
+
+
+		// 向属性源存储真实的端口号
 		((Map<String, Object>) source.getSource()).put(propertyName, port);
 	}
 
