@@ -91,7 +91,9 @@ class JedisConnectionConfiguration extends RedisConnectionConfiguration {
 	private JedisClientConfigurationBuilder applyProperties(JedisClientConfigurationBuilder builder) {
 		PropertyMapper map = PropertyMapper.get().alwaysApplyingWhenNonNull();
 		map.from(getProperties().isSsl()).whenTrue().toCall(builder::useSsl);
+		// timeout 一般可能认为是读取的超时时间，这段时间没有发送数据
 		map.from(getProperties().getTimeout()).to(builder::readTimeout);
+		// connectTimeout 就是都没有连上 redis 这段时间内
 		map.from(getProperties().getConnectTimeout()).to(builder::connectTimeout);
 		map.from(getProperties().getClientName()).whenHasText().to(builder::clientName);
 		return builder;

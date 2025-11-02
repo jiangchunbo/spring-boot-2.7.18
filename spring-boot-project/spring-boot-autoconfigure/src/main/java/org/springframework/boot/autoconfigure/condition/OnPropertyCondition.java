@@ -49,12 +49,15 @@ class OnPropertyCondition extends SpringBootCondition {
 	@Override
 	public ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata metadata) {
 		List<AnnotationAttributes> allAnnotationAttributes = metadata.getAnnotations()
-			.stream(ConditionalOnProperty.class.getName())
-			.filter(MergedAnnotationPredicates.unique(MergedAnnotation::getMetaTypes))
-			.map(MergedAnnotation::asAnnotationAttributes)
-			.collect(Collectors.toList());
+				// 过滤 ConditionalOnProperty 注解
+				.stream(ConditionalOnProperty.class.getName())
+				.filter(MergedAnnotationPredicates.unique(MergedAnnotation::getMetaTypes))
+				.map(MergedAnnotation::asAnnotationAttributes)
+				.collect(Collectors.toList());
 		List<ConditionMessage> noMatch = new ArrayList<>();
 		List<ConditionMessage> match = new ArrayList<>();
+
+		// 遍历每个属性条件注解
 		for (AnnotationAttributes annotationAttributes : allAnnotationAttributes) {
 			ConditionOutcome outcome = determineOutcome(annotationAttributes, context.getEnvironment());
 			(outcome.isMatch() ? match : noMatch).add(outcome.getConditionMessage());
@@ -66,22 +69,31 @@ class OnPropertyCondition extends SpringBootCondition {
 	}
 
 	private ConditionOutcome determineOutcome(AnnotationAttributes annotationAttributes, PropertyResolver resolver) {
+		// 把每个注解的属性 AnnotationAttributes 都传给 Spec
 		Spec spec = new Spec(annotationAttributes);
+
+		// 创建两个容器，传给 collectProperties 方法，用于收集结果
 		List<String> missingProperties = new ArrayList<>();
 		List<String> nonMatchingProperties = new ArrayList<>();
+
+		// 进行收集
 		spec.collectProperties(resolver, missingProperties, nonMatchingProperties);
+
+		// 如果存在 missing，那么不匹配
 		if (!missingProperties.isEmpty()) {
 			return ConditionOutcome.noMatch(ConditionMessage.forCondition(ConditionalOnProperty.class, spec)
-				.didNotFind("property", "properties")
-				.items(Style.QUOTE, missingProperties));
+					.didNotFind("property", "properties")
+					.items(Style.QUOTE, missingProperties));
 		}
+
+		// 如果没有 missing，但是不匹配
 		if (!nonMatchingProperties.isEmpty()) {
 			return ConditionOutcome.noMatch(ConditionMessage.forCondition(ConditionalOnProperty.class, spec)
-				.found("different value in property", "different value in properties")
-				.items(Style.QUOTE, nonMatchingProperties));
+					.found("different value in property", "different value in properties")
+					.items(Style.QUOTE, nonMatchingProperties));
 		}
 		return ConditionOutcome
-			.match(ConditionMessage.forCondition(ConditionalOnProperty.class, spec).because("matched"));
+				.match(ConditionMessage.forCondition(ConditionalOnProperty.class, spec).because("matched"));
 	}
 
 	private static class Spec {
@@ -95,17 +107,27 @@ class OnPropertyCondition extends SpringBootCondition {
 		private final boolean matchIfMissing;
 
 		Spec(AnnotationAttributes annotationAttributes) {
+			// 获取前缀 prefix (也可能没有)
 			String prefix = annotationAttributes.getString("prefix").trim();
 			if (StringUtils.hasText(prefix) && !prefix.endsWith(".")) {
 				prefix = prefix + ".";
 			}
+
+			// 前缀
 			this.prefix = prefix;
+			// 获取 havingValue
 			this.havingValue = annotationAttributes.getString("havingValue");
+			// 注解属性 value or name
 			this.names = getNames(annotationAttributes);
+			// 获取 matchIfMissing
 			this.matchIfMissing = annotationAttributes.getBoolean("matchIfMissing");
 		}
 
+		/**
+		 * 要么获取 value 的值，要么获取 name 的值
+		 */
 		private String[] getNames(Map<String, Object> annotationAttributes) {
+			// 总之 value 和 name 有且仅有 1 个是有值的
 			String[] value = (String[]) annotationAttributes.get("value");
 			String[] name = (String[]) annotationAttributes.get("name");
 			Assert.state(value.length > 0 || name.length > 0,
@@ -117,13 +139,15 @@ class OnPropertyCondition extends SpringBootCondition {
 
 		private void collectProperties(PropertyResolver resolver, List<String> missing, List<String> nonMatching) {
 			for (String name : this.names) {
+				// 名字前面都要加上 prefix(也可能没有，所以 name 直接就是完全名)
 				String key = this.prefix + name;
+
+				// PropertyResolver 其实就是 Environment，检查是否包含这个属性
 				if (resolver.containsProperty(key)) {
 					if (!isMatch(resolver.getProperty(key), this.havingValue)) {
 						nonMatching.add(name);
 					}
-				}
-				else {
+				} else {
 					if (!this.matchIfMissing) {
 						missing.add(name);
 					}
@@ -131,10 +155,21 @@ class OnPropertyCondition extends SpringBootCondition {
 			}
 		}
 
+		/**
+		 * 如何才算匹配上
+		 *
+		 * @param value         从 Environment 获取的属性值
+		 * @param requiredValue 注解里面的 havingValue 值
+		 * @return 是否匹配
+		 */
 		private boolean isMatch(String value, String requiredValue) {
+			// 如果用户定义了 havingValue，检查 havingValue 是否等于 value
+			// 纯纯是字符串比较
 			if (StringUtils.hasLength(requiredValue)) {
 				return requiredValue.equalsIgnoreCase(value);
 			}
+
+			// 如果没有定义 havingValue，那么只要 value 不是 false 就匹配
 			return !"false".equalsIgnoreCase(value);
 		}
 
@@ -145,8 +180,7 @@ class OnPropertyCondition extends SpringBootCondition {
 			result.append(this.prefix);
 			if (this.names.length == 1) {
 				result.append(this.names[0]);
-			}
-			else {
+			} else {
 				result.append("[");
 				result.append(StringUtils.arrayToCommaDelimitedString(this.names));
 				result.append("]");
