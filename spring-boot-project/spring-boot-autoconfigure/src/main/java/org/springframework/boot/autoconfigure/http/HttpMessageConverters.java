@@ -49,10 +49,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupp
  * @author Dave Syer
  * @author Phillip Webb
  * @author Andy Wilkinson
- * @since 2.0.0
  * @see #HttpMessageConverters(HttpMessageConverter...)
  * @see #HttpMessageConverters(Collection)
  * @see #getConverters()
+ * @since 2.0.0
  */
 public class HttpMessageConverters implements Iterable<HttpMessageConverter<?>> {
 
@@ -79,10 +79,11 @@ public class HttpMessageConverters implements Iterable<HttpMessageConverter<?>> 
 	/**
 	 * Create a new {@link HttpMessageConverters} instance with the specified additional
 	 * converters.
+	 *
 	 * @param additionalConverters additional converters to be added. Items are added just
-	 * before any default converter of the same type (or at the front of the list if no
-	 * default converter is found). The {@link #postProcessConverters(List)} method can be
-	 * used for further converter manipulation.
+	 *                             before any default converter of the same type (or at the front of the list if no
+	 *                             default converter is found). The {@link #postProcessConverters(List)} method can be
+	 *                             used for further converter manipulation.
 	 */
 	public HttpMessageConverters(HttpMessageConverter<?>... additionalConverters) {
 		this(Arrays.asList(additionalConverters));
@@ -91,22 +92,25 @@ public class HttpMessageConverters implements Iterable<HttpMessageConverter<?>> 
 	/**
 	 * Create a new {@link HttpMessageConverters} instance with the specified additional
 	 * converters.
+	 *
 	 * @param additionalConverters additional converters to be added. Items are added just
-	 * before any default converter of the same type (or at the front of the list if no
-	 * default converter is found). The {@link #postProcessConverters(List)} method can be
-	 * used for further converter manipulation.
+	 *                             before any default converter of the same type (or at the front of the list if no
+	 *                             default converter is found). The {@link #postProcessConverters(List)} method can be
+	 *                             used for further converter manipulation.
 	 */
 	public HttpMessageConverters(Collection<HttpMessageConverter<?>> additionalConverters) {
+		// 默认添加默认的 HttpMessageConverter
 		this(true, additionalConverters);
 	}
 
 	/**
 	 * Create a new {@link HttpMessageConverters} instance with the specified converters.
+	 *
 	 * @param addDefaultConverters if default converters should be added
-	 * @param converters converters to be added. Items are added just before any default
-	 * converter of the same type (or at the front of the list if no default converter is
-	 * found). The {@link #postProcessConverters(List)} method can be used for further
-	 * converter manipulation.
+	 * @param converters           converters to be added. Items are added just before any default
+	 *                             converter of the same type (or at the front of the list if no default converter is
+	 *                             found). The {@link #postProcessConverters(List)} method can be used for further
+	 *                             converter manipulation.
 	 */
 	public HttpMessageConverters(boolean addDefaultConverters, Collection<HttpMessageConverter<?>> converters) {
 		List<HttpMessageConverter<?>> combined = getCombinedConverters(converters,
@@ -115,24 +119,37 @@ public class HttpMessageConverters implements Iterable<HttpMessageConverter<?>> 
 		this.converters = Collections.unmodifiableList(combined);
 	}
 
+	/**
+	 * 只是将 converters 和 defaultConverters 连起来，得到一个新的 List
+	 */
 	private List<HttpMessageConverter<?>> getCombinedConverters(Collection<HttpMessageConverter<?>> converters,
-			List<HttpMessageConverter<?>> defaultConverters) {
+																List<HttpMessageConverter<?>> defaultConverters) {
+		// 需要返回的结果
 		List<HttpMessageConverter<?>> combined = new ArrayList<>();
 		List<HttpMessageConverter<?>> processing = new ArrayList<>(converters);
+
+		// 遍历每个默认的
 		for (HttpMessageConverter<?> defaultConverter : defaultConverters) {
+
 			Iterator<HttpMessageConverter<?>> iterator = processing.iterator();
 			while (iterator.hasNext()) {
 				HttpMessageConverter<?> candidate = iterator.next();
+				// candidate 是否可以取代 default，如果可以取代，就从 processing 迁移到 combined
 				if (isReplacement(defaultConverter, candidate)) {
 					combined.add(candidate);
 					iterator.remove();
 				}
 			}
+
+			// 不管如何 defaultConverter 依然添加
+			// 但是，Replacement 先 add 所以不会用到这个
 			combined.add(defaultConverter);
 			if (defaultConverter instanceof AllEncompassingFormHttpMessageConverter) {
 				configurePartConverters((AllEncompassingFormHttpMessageConverter) defaultConverter, converters);
 			}
 		}
+
+		// 剩余的加到开头
 		combined.addAll(0, processing);
 		return combined;
 	}
@@ -143,6 +160,8 @@ public class HttpMessageConverters implements Iterable<HttpMessageConverter<?>> 
 				return false;
 			}
 		}
+
+		// candidate 是 defaultConverter 子类，或者就是这个类型，兼容，替换 default
 		Class<?> converterClass = defaultConverter.getClass();
 		if (ClassUtils.isAssignableValue(converterClass, candidate)) {
 			return true;
@@ -152,7 +171,7 @@ public class HttpMessageConverters implements Iterable<HttpMessageConverter<?>> 
 	}
 
 	private void configurePartConverters(AllEncompassingFormHttpMessageConverter formConverter,
-			Collection<HttpMessageConverter<?>> converters) {
+										 Collection<HttpMessageConverter<?>> converters) {
 		List<HttpMessageConverter<?>> partConverters = formConverter.getPartConverters();
 		List<HttpMessageConverter<?>> combinedConverters = getCombinedConverters(converters, partConverters);
 		combinedConverters = postProcessPartConverters(combinedConverters);
@@ -162,6 +181,7 @@ public class HttpMessageConverters implements Iterable<HttpMessageConverter<?>> 
 	/**
 	 * Method that can be used to post-process the {@link HttpMessageConverter} list
 	 * before it is used.
+	 *
 	 * @param converters a mutable list of the converters that will be used.
 	 * @return the final converts list to use
 	 */
@@ -173,6 +193,7 @@ public class HttpMessageConverters implements Iterable<HttpMessageConverter<?>> 
 	 * Method that can be used to post-process the {@link HttpMessageConverter} list
 	 * before it is used to configure the part converters of
 	 * {@link AllEncompassingFormHttpMessageConverter}.
+	 *
 	 * @param converters a mutable list of the converters that will be used.
 	 * @return the final converts list to use
 	 * @since 1.3.0
@@ -181,6 +202,13 @@ public class HttpMessageConverters implements Iterable<HttpMessageConverter<?>> 
 		return converters;
 	}
 
+	/**
+	 * 获取默认转换器
+	 * <p>
+	 * 从哪里获取默认转换器，一个是 mvc，另一个是 RestTemplate
+	 *
+	 * @return 默认的 HttpMessageConverter List
+	 */
 	private List<HttpMessageConverter<?>> getDefaultConverters() {
 		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		if (ClassUtils.isPresent("org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport",
@@ -192,8 +220,7 @@ public class HttpMessageConverters implements Iterable<HttpMessageConverter<?>> 
 				}
 
 			}.defaultMessageConverters());
-		}
-		else {
+		} else {
 			converters.addAll(new RestTemplate().getMessageConverters());
 		}
 		reorderXmlConvertersToEnd(converters);
@@ -202,7 +229,7 @@ public class HttpMessageConverters implements Iterable<HttpMessageConverter<?>> 
 
 	private void reorderXmlConvertersToEnd(List<HttpMessageConverter<?>> converters) {
 		List<HttpMessageConverter<?>> xml = new ArrayList<>();
-		for (Iterator<HttpMessageConverter<?>> iterator = converters.iterator(); iterator.hasNext();) {
+		for (Iterator<HttpMessageConverter<?>> iterator = converters.iterator(); iterator.hasNext(); ) {
 			HttpMessageConverter<?> converter = iterator.next();
 			if ((converter instanceof AbstractXmlHttpMessageConverter)
 					|| (converter instanceof MappingJackson2XmlHttpMessageConverter)) {
@@ -221,6 +248,7 @@ public class HttpMessageConverters implements Iterable<HttpMessageConverter<?>> 
 	/**
 	 * Return an immutable list of the converters in the order that they will be
 	 * registered.
+	 *
 	 * @return the converters
 	 */
 	public List<HttpMessageConverter<?>> getConverters() {
@@ -230,8 +258,7 @@ public class HttpMessageConverters implements Iterable<HttpMessageConverter<?>> 
 	private static void addClassIfExists(List<Class<?>> list, String className) {
 		try {
 			list.add(Class.forName(className));
-		}
-		catch (ClassNotFoundException | NoClassDefFoundError ex) {
+		} catch (ClassNotFoundException | NoClassDefFoundError ex) {
 			// Ignore
 		}
 	}
@@ -239,8 +266,7 @@ public class HttpMessageConverters implements Iterable<HttpMessageConverter<?>> 
 	private static void putIfExists(Map<Class<?>, Class<?>> map, String keyClassName, String valueClassName) {
 		try {
 			map.put(Class.forName(keyClassName), Class.forName(valueClassName));
-		}
-		catch (ClassNotFoundException | NoClassDefFoundError ex) {
+		} catch (ClassNotFoundException | NoClassDefFoundError ex) {
 			// Ignore
 		}
 	}

@@ -138,6 +138,7 @@ public class JacksonAutoConfiguration {
 				List<Jackson2ObjectMapperBuilderCustomizer> customizers) {
 			Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder();
 			builder.applicationContext(applicationContext);
+			// 定制化
 			customize(builder, customizers);
 			return builder;
 		}

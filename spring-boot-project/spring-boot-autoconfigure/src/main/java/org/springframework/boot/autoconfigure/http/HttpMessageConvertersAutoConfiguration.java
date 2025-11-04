@@ -55,18 +55,23 @@ import org.springframework.http.converter.StringHttpMessageConverter;
  * @since 2.0.0
  */
 @AutoConfiguration(
-		after = { GsonAutoConfiguration.class, JacksonAutoConfiguration.class, JsonbAutoConfiguration.class })
+		after = {GsonAutoConfiguration.class, JacksonAutoConfiguration.class, JsonbAutoConfiguration.class})
 @ConditionalOnClass(HttpMessageConverter.class)
 @Conditional(NotReactiveWebApplicationCondition.class)
-@Import({ JacksonHttpMessageConvertersConfiguration.class, GsonHttpMessageConvertersConfiguration.class,
-		JsonbHttpMessageConvertersConfiguration.class })
+@Import({JacksonHttpMessageConvertersConfiguration.class, GsonHttpMessageConvertersConfiguration.class,
+		JsonbHttpMessageConvertersConfiguration.class})
 public class HttpMessageConvertersAutoConfiguration {
 
 	static final String PREFERRED_MAPPER_PROPERTY = "spring.mvc.converters.preferred-json-mapper";
 
+	/**
+	 * 实际上是 {@code Iterable<HttpMessageConverter<?>>}
+	 */
 	@Bean
 	@ConditionalOnMissingBean
 	public HttpMessageConverters messageConverters(ObjectProvider<HttpMessageConverter<?>> converters) {
+		// 不要觉得它只是从外部接收 HttpMessageConverter，他自己也会添加默认的 HttpMessageConverter
+		// 由 addDefaultConverters 控制，默认是 true
 		return new HttpMessageConverters(converters.orderedStream().collect(Collectors.toList()));
 	}
 
