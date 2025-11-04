@@ -16,8 +16,6 @@
 
 package org.springframework.boot.autoconfigure.http;
 
-import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -40,8 +38,12 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 
+import java.util.stream.Collectors;
+
 /**
  * {@link EnableAutoConfiguration Auto-configuration} for {@link HttpMessageConverter}s.
+ * <p>
+ * 这个自动配置类，用于发现一系列 HttpMessageConverter，而且它还有一个容器 {@link HttpMessageConverters}
  *
  * @author Dave Syer
  * @author Christian Dupuis
@@ -65,7 +67,7 @@ public class HttpMessageConvertersAutoConfiguration {
 	static final String PREFERRED_MAPPER_PROPERTY = "spring.mvc.converters.preferred-json-mapper";
 
 	/**
-	 * 实际上是 {@code Iterable<HttpMessageConverter<?>>}
+	 * 实际上是 {@link  HttpMessageConverter} 的迭代器
 	 */
 	@Bean
 	@ConditionalOnMissingBean
