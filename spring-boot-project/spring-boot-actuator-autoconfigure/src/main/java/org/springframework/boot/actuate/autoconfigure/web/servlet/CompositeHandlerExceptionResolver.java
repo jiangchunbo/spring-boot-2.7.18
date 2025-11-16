@@ -34,6 +34,9 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
 
 /**
  * Composite {@link HandlerExceptionResolver}.
+ * <p>
+ * Spring Framework 可能会称之为 HandlerExceptionResolverComposite，此处是 CompositeHandlerExceptionResolver
+ * 所以，两边的代码风格不太一致
  *
  * @author Andy Wilkinson
  * @author Stephane Nicoll
@@ -50,7 +53,7 @@ class CompositeHandlerExceptionResolver implements HandlerExceptionResolver {
 
 	@Override
 	public ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response, Object handler,
-			Exception ex) {
+										 Exception ex) {
 		for (HandlerExceptionResolver resolver : getResolvers()) {
 			ModelAndView resolved = resolver.resolveException(request, response, handler, ex);
 			if (resolved != null) {

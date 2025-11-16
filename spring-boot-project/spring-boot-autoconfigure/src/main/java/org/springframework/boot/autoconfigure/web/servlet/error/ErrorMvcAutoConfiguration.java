@@ -69,6 +69,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.http.MediaType;
 import org.springframework.web.servlet.DispatcherServlet;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.BeanNameViewResolver;
 import org.springframework.web.util.HtmlUtils;
@@ -87,8 +88,8 @@ import org.springframework.web.util.HtmlUtils;
 // Load before the main WebMvcAutoConfiguration so that the error View is available
 @AutoConfiguration(before = WebMvcAutoConfiguration.class)
 @ConditionalOnWebApplication(type = Type.SERVLET)
-@ConditionalOnClass({ Servlet.class, DispatcherServlet.class })
-@EnableConfigurationProperties({ ServerProperties.class, WebMvcProperties.class })
+@ConditionalOnClass({Servlet.class, DispatcherServlet.class})
+@EnableConfigurationProperties({ServerProperties.class, WebMvcProperties.class})
 public class ErrorMvcAutoConfiguration {
 
 	private final ServerProperties serverProperties;
@@ -97,6 +98,9 @@ public class ErrorMvcAutoConfiguration {
 		this.serverProperties = serverProperties;
 	}
 
+	/**
+	 * 本质上是 HandlerExceptionResolver，具有最高优先级，比 {@link org.springframework.web.servlet.handler.HandlerExceptionResolverComposite} 优先级还要高
+	 */
 	@Bean
 	@ConditionalOnMissingBean(value = ErrorAttributes.class, search = SearchStrategy.CURRENT)
 	public DefaultErrorAttributes errorAttributes() {
@@ -106,7 +110,7 @@ public class ErrorMvcAutoConfiguration {
 	@Bean
 	@ConditionalOnMissingBean(value = ErrorController.class, search = SearchStrategy.CURRENT)
 	public BasicErrorController basicErrorController(ErrorAttributes errorAttributes,
-			ObjectProvider<ErrorViewResolver> errorViewResolvers) {
+													 ObjectProvider<ErrorViewResolver> errorViewResolvers) {
 		return new BasicErrorController(errorAttributes, this.serverProperties.getError(),
 				errorViewResolvers.orderedStream().collect(Collectors.toList()));
 	}
@@ -122,7 +126,7 @@ public class ErrorMvcAutoConfiguration {
 	}
 
 	@Configuration(proxyBeanMethods = false)
-	@EnableConfigurationProperties({ WebProperties.class, WebMvcProperties.class })
+	@EnableConfigurationProperties({WebProperties.class, WebMvcProperties.class})
 	static class DefaultErrorViewResolverConfiguration {
 
 		private final ApplicationContext applicationContext;
@@ -213,15 +217,15 @@ public class ErrorMvcAutoConfiguration {
 				response.setContentType(getContentType());
 			}
 			builder.append("<html><body><h1>Whitelabel Error Page</h1>")
-				.append("<p>This application has no explicit mapping for /error, so you are seeing this as a fallback.</p>")
-				.append("<div id='created'>")
-				.append(timestamp)
-				.append("</div>")
-				.append("<div>There was an unexpected error (type=")
-				.append(htmlEscape(model.get("error")))
-				.append(", status=")
-				.append(htmlEscape(model.get("status")))
-				.append(").</div>");
+					.append("<p>This application has no explicit mapping for /error, so you are seeing this as a fallback.</p>")
+					.append("<div id='created'>")
+					.append(timestamp)
+					.append("</div>")
+					.append("<div>There was an unexpected error (type=")
+					.append(htmlEscape(model.get("error")))
+					.append(", status=")
+					.append(htmlEscape(model.get("status")))
+					.append(").</div>");
 			if (message != null) {
 				builder.append("<div>").append(htmlEscape(message)).append("</div>");
 			}
@@ -294,9 +298,8 @@ public class ErrorMvcAutoConfiguration {
 			for (String errorControllerBean : errorControllerBeans) {
 				try {
 					beanFactory.getBeanDefinition(errorControllerBean)
-						.setAttribute(AutoProxyUtils.PRESERVE_TARGET_CLASS_ATTRIBUTE, Boolean.TRUE);
-				}
-				catch (Throwable ex) {
+							.setAttribute(AutoProxyUtils.PRESERVE_TARGET_CLASS_ATTRIBUTE, Boolean.TRUE);
+				} catch (Throwable ex) {
 					// Ignore
 				}
 			}
