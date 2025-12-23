@@ -196,7 +196,7 @@ public class SpringApplication {
 	private boolean addCommandLineProperties = true;
 
 	/**
-	 * 是否添加转换器服务
+	 * 是否添加转换器服务。实际上，ConversionService 是创建之后存储在 Environment 中的，之后会被分享给 BeanFactory。
 	 */
 	private boolean addConversionService = true;
 
@@ -461,6 +461,7 @@ public class SpringApplication {
 
 		// 关闭 BootstrapContext
 		bootstrapContext.close(context);
+
 		if (this.logStartupInfo) {
 			logStartupInfo(context.getParent() == null);
 			logStartupProfileInfo(context);
@@ -587,7 +588,7 @@ public class SpringApplication {
 	 */
 	protected void configureEnvironment(ConfigurableEnvironment environment, String[] args) {
 		// 添加转换器
-		if (this.addConversionService) {
+		if (this.addConversionService) { // 创建一个全新的转换器服务给 Environment
 			environment.setConversionService(new ApplicationConversionService());
 		}
 
@@ -724,7 +725,7 @@ public class SpringApplication {
 		}
 
 		// 给 BeanFactory 注入转换服务
-		if (this.addConversionService) {
+		if (this.addConversionService) { // 把 Environment 的转换器服务交给 BeanFactory
 			context.getBeanFactory().setConversionService(context.getEnvironment().getConversionService());
 		}
 	}
