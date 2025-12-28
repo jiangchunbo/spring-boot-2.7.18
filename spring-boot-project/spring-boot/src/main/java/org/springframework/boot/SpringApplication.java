@@ -387,6 +387,8 @@ public class SpringApplication {
 			// 调用 Runners
 			callRunners(context, applicationArguments);
 		} catch (Throwable ex) {
+
+			// 处理 run 过程的异常，例如 循环依赖
 			handleRunFailure(context, ex, listeners);
 			throw new IllegalStateException(ex);
 		}
@@ -934,6 +936,7 @@ public class SpringApplication {
 					listeners.failed(context, exception);
 				}
 			} finally {
+				// 报告异常
 				reportFailure(getExceptionReporters(context), exception);
 				if (context != null) {
 					context.close();

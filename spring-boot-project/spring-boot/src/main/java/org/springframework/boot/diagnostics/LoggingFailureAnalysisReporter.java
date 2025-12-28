@@ -23,6 +23,8 @@ import org.springframework.util.StringUtils;
 
 /**
  * {@link FailureAnalysisReporter} that logs the failure analysis.
+ * <p>
+ * Spring Boot 应用启动失败时会进行失败分析，并将分析结果进行报告，这是默认的 reporter，将信息输出到日志框架。
  *
  * @author Andy Wilkinson
  * @since 1.4.0

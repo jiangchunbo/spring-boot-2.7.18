@@ -30,6 +30,7 @@ public abstract class AbstractFailureAnalyzer<T extends Throwable> implements Fa
 
 	@Override
 	public FailureAnalysis analyze(Throwable failure) {
+		// 找到异常的原因
 		T cause = findCause(failure, getCauseType());
 		return (cause != null) ? analyze(failure, cause) : null;
 	}

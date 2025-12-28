@@ -67,6 +67,12 @@ class ConfigurationPropertiesScanRegistrar implements ImportBeanDefinitionRegist
 		scan(registry, packagesToScan);
 	}
 
+	/**
+	 * 从注解中解析出需要扫描的 package
+	 *
+	 * @param metadata 注解
+	 * @return packages
+	 */
 	private Set<String> getPackagesToScan(AnnotationMetadata metadata) {
 		// 从一个 Map 结构解析出 AnnotationAttributes
 		AnnotationAttributes attributes = AnnotationAttributes

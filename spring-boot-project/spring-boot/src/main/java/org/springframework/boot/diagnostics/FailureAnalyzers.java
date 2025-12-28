@@ -69,7 +69,7 @@ final class FailureAnalyzers implements SpringBootExceptionReporter {
 	}
 
 	private List<FailureAnalyzer> loadFailureAnalyzers(List<String> classNames,
-			ConfigurableApplicationContext context) {
+													   ConfigurableApplicationContext context) {
 		Instantiator<FailureAnalyzer> instantiator = new Instantiator<>(FailureAnalyzer.class,
 				(availableParameters) -> {
 					if (context != null) {
@@ -82,14 +82,14 @@ final class FailureAnalyzers implements SpringBootExceptionReporter {
 	}
 
 	private List<FailureAnalyzer> handleAwareAnalyzers(List<FailureAnalyzer> analyzers,
-			ConfigurableApplicationContext context) {
+													   ConfigurableApplicationContext context) {
 		List<FailureAnalyzer> awareAnalyzers = analyzers.stream()
-			.filter((analyzer) -> analyzer instanceof BeanFactoryAware || analyzer instanceof EnvironmentAware)
-			.collect(Collectors.toList());
+				.filter((analyzer) -> analyzer instanceof BeanFactoryAware || analyzer instanceof EnvironmentAware)
+				.collect(Collectors.toList());
 		if (!awareAnalyzers.isEmpty()) {
 			String awareAnalyzerNames = StringUtils.collectionToCommaDelimitedString(awareAnalyzers.stream()
-				.map((analyzer) -> analyzer.getClass().getName())
-				.collect(Collectors.toList()));
+					.map((analyzer) -> analyzer.getClass().getName())
+					.collect(Collectors.toList()));
 			logger.warn(LogMessage.format(
 					"FailureAnalyzers [%s] implement BeanFactoryAware or EnvironmentAware. "
 							+ "Support for these interfaces on FailureAnalyzers is deprecated, "
@@ -99,8 +99,8 @@ final class FailureAnalyzers implements SpringBootExceptionReporter {
 			if (context == null) {
 				logger.trace(LogMessage.format("Skipping [%s] due to missing context", awareAnalyzerNames));
 				return analyzers.stream()
-					.filter((analyzer) -> !awareAnalyzers.contains(analyzer))
-					.collect(Collectors.toList());
+						.filter((analyzer) -> !awareAnalyzers.contains(analyzer))
+						.collect(Collectors.toList());
 			}
 			awareAnalyzers.forEach((analyzer) -> {
 				if (analyzer instanceof BeanFactoryAware) {
@@ -114,6 +114,9 @@ final class FailureAnalyzers implements SpringBootExceptionReporter {
 		return analyzers;
 	}
 
+	/**
+	 * {@link SpringBootExceptionReporter} 唯一实现的方法，用于报告异常
+	 */
 	@Override
 	public boolean reportException(Throwable failure) {
 		FailureAnalysis analysis = analyze(failure, this.analyzers);
@@ -127,8 +130,7 @@ final class FailureAnalyzers implements SpringBootExceptionReporter {
 				if (analysis != null) {
 					return analysis;
 				}
-			}
-			catch (Throwable ex) {
+			} catch (Throwable ex) {
 				logger.trace(LogMessage.format("FailureAnalyzer %s failed", analyzer), ex);
 			}
 		}
