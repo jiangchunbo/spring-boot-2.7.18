@@ -33,6 +33,8 @@ import org.springframework.util.Assert;
 /**
  * {@link BeanPostProcessor} that applies all {@link WebServerFactoryCustomizer} beans
  * from the bean factory to {@link WebServerFactory} beans.
+ * <p>
+ * 实现了 BeanPostProcessor，但是这个处理器只关注 WebServerFactory 类型的 bean，也就是创建 WebServer 的工厂类。
  *
  * @author Dave Syer
  * @author Phillip Webb
@@ -45,6 +47,9 @@ public class WebServerFactoryCustomizerBeanPostProcessor implements BeanPostProc
 
 	private List<WebServerFactoryCustomizer<?>> customizers;
 
+	/**
+	 * Aware 感知注入 beanFactory，稍后会从容器中加载所有的 WebServerFactoryCustomizer
+	 */
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		Assert.isInstanceOf(ListableBeanFactory.class, beanFactory,
@@ -67,9 +72,12 @@ public class WebServerFactoryCustomizerBeanPostProcessor implements BeanPostProc
 
 	@SuppressWarnings("unchecked")
 	private void postProcessBeforeInitialization(WebServerFactory webServerFactory) {
+		// 获取容器中所有的 WebServerFactoryCustomizer，稍后循环调用它们的 customize
 		LambdaSafe.callbacks(WebServerFactoryCustomizer.class, getCustomizers(), webServerFactory)
-			.withLogger(WebServerFactoryCustomizerBeanPostProcessor.class)
-			.invoke((customizer) -> customizer.customize(webServerFactory));
+				.withLogger(WebServerFactoryCustomizerBeanPostProcessor.class)
+				.invoke((customizer) -> customizer.customize(webServerFactory));
+
+		// ps 看起来复杂的原因是 LambdaSafe 会检查每一个 customizer 它们的泛型参数是否是 WebServerFactory
 	}
 
 	private Collection<WebServerFactoryCustomizer<?>> getCustomizers() {
@@ -82,7 +90,7 @@ public class WebServerFactoryCustomizerBeanPostProcessor implements BeanPostProc
 		return this.customizers;
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	private Collection<WebServerFactoryCustomizer<?>> getWebServerFactoryCustomizerBeans() {
 		return (Collection) this.beanFactory.getBeansOfType(WebServerFactoryCustomizer.class, false, false).values();
 	}
