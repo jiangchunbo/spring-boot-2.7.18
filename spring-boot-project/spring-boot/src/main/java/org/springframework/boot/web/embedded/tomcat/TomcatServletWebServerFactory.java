@@ -203,6 +203,8 @@ public class TomcatServletWebServerFactory extends AbstractServletWebServerFacto
 		for (LifecycleListener listener : this.serverLifecycleListeners) {
 			tomcat.getServer().addLifecycleListener(listener);
 		}
+
+		// 创建 Connector
 		Connector connector = new Connector(this.protocol);
 		connector.setThrowOnFailure(true);
 		tomcat.getService().addConnector(connector);

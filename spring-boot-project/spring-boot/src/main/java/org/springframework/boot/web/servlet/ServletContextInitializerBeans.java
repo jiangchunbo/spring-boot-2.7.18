@@ -79,55 +79,65 @@ public class ServletContextInitializerBeans extends AbstractCollection<ServletCo
 	@SafeVarargs
 	@SuppressWarnings("varargs")
 	public ServletContextInitializerBeans(ListableBeanFactory beanFactory,
-			Class<? extends ServletContextInitializer>... initializerTypes) {
+										  Class<? extends ServletContextInitializer>... initializerTypes) {
+
 		this.initializers = new LinkedMultiValueMap<>();
+
+		// 一般使用默认类型 ServletContextInitializer
 		this.initializerTypes = (initializerTypes.length != 0) ? Arrays.asList(initializerTypes)
 				: Collections.singletonList(ServletContextInitializer.class);
+
+		// 寻找 ServletRegistrationBean、FilterRegistrationBean、ServletListenerRegistrationBean 直接注册到 initializers
 		addServletContextInitializerBeans(beanFactory);
+
+		// 寻找 Servlet、Filter、Listener 然后适配成 RegistrationBean 最后注册到 initializers
 		addAdaptableBeans(beanFactory);
+
+		// 寻找结束，开始遍历
 		List<ServletContextInitializer> sortedInitializers = this.initializers.values()
-			.stream()
-			.flatMap((value) -> value.stream().sorted(AnnotationAwareOrderComparator.INSTANCE))
-			.collect(Collectors.toList());
+				.stream()
+				.flatMap((value) -> value.stream().sorted(AnnotationAwareOrderComparator.INSTANCE))
+				.collect(Collectors.toList());
 		this.sortedList = Collections.unmodifiableList(sortedInitializers);
 		logMappings(this.initializers);
 	}
 
 	private void addServletContextInitializerBeans(ListableBeanFactory beanFactory) {
 		for (Class<? extends ServletContextInitializer> initializerType : this.initializerTypes) {
+			// 从 beanFactory 中寻找指定类型的 bean，然后还要排序
 			for (Entry<String, ? extends ServletContextInitializer> initializerBean : getOrderedBeansOfType(beanFactory,
 					initializerType)) {
+				// 根据 initializerBean 类型，走不同的策略
 				addServletContextInitializerBean(initializerBean.getKey(), initializerBean.getValue(), beanFactory);
 			}
 		}
 	}
 
+	/**
+	 * 分类讨论 initializer，例如 ServletRegistrationBean、FilterRegistrationBean、DelegatingFilterProxyRegistrationBean 等
+	 */
 	private void addServletContextInitializerBean(String beanName, ServletContextInitializer initializer,
-			ListableBeanFactory beanFactory) {
+												  ListableBeanFactory beanFactory) {
 		if (initializer instanceof ServletRegistrationBean) {
 			Servlet source = ((ServletRegistrationBean<?>) initializer).getServlet();
 			addServletContextInitializerBean(Servlet.class, beanName, initializer, beanFactory, source);
-		}
-		else if (initializer instanceof FilterRegistrationBean) {
+		} else if (initializer instanceof FilterRegistrationBean) {
 			Filter source = ((FilterRegistrationBean<?>) initializer).getFilter();
 			addServletContextInitializerBean(Filter.class, beanName, initializer, beanFactory, source);
-		}
-		else if (initializer instanceof DelegatingFilterProxyRegistrationBean) {
+		} else if (initializer instanceof DelegatingFilterProxyRegistrationBean) {
 			String source = ((DelegatingFilterProxyRegistrationBean) initializer).getTargetBeanName();
 			addServletContextInitializerBean(Filter.class, beanName, initializer, beanFactory, source);
-		}
-		else if (initializer instanceof ServletListenerRegistrationBean) {
+		} else if (initializer instanceof ServletListenerRegistrationBean) {
 			EventListener source = ((ServletListenerRegistrationBean<?>) initializer).getListener();
 			addServletContextInitializerBean(EventListener.class, beanName, initializer, beanFactory, source);
-		}
-		else {
+		} else {
 			addServletContextInitializerBean(ServletContextInitializer.class, beanName, initializer, beanFactory,
 					initializer);
 		}
 	}
 
 	private void addServletContextInitializerBean(Class<?> type, String beanName, ServletContextInitializer initializer,
-			ListableBeanFactory beanFactory, Object source) {
+												  ListableBeanFactory beanFactory, Object source) {
 		this.initializers.add(type, initializer);
 		if (source != null) {
 			// Mark the underlying source as seen in case it wraps an existing bean
@@ -152,8 +162,13 @@ public class ServletContextInitializerBeans extends AbstractCollection<ServletCo
 	@SuppressWarnings("unchecked")
 	protected void addAdaptableBeans(ListableBeanFactory beanFactory) {
 		MultipartConfigElement multipartConfig = getMultipartConfig(beanFactory);
+
+		// 使用 ServletRegistrationBeanAdapter 包装 Servlet
 		addAsRegistrationBean(beanFactory, Servlet.class, new ServletRegistrationBeanAdapter(multipartConfig));
+
+		// 使用 FilterRegistrationBeanAdapter 包装 Filter
 		addAsRegistrationBean(beanFactory, Filter.class, new FilterRegistrationBeanAdapter());
+
 		for (Class<?> listenerType : ServletListenerRegistrationBean.getSupportedTypes()) {
 			addAsRegistrationBean(beanFactory, EventListener.class, (Class<EventListener>) listenerType,
 					new ServletListenerRegistrationBeanAdapter());
@@ -167,21 +182,26 @@ public class ServletContextInitializerBeans extends AbstractCollection<ServletCo
 	}
 
 	protected <T> void addAsRegistrationBean(ListableBeanFactory beanFactory, Class<T> type,
-			RegistrationBeanAdapter<T> adapter) {
+											 RegistrationBeanAdapter<T> adapter) {
 		addAsRegistrationBean(beanFactory, type, type, adapter);
 	}
 
 	private <T, B extends T> void addAsRegistrationBean(ListableBeanFactory beanFactory, Class<T> type,
-			Class<B> beanType, RegistrationBeanAdapter<T> adapter) {
+														Class<B> beanType, RegistrationBeanAdapter<T> adapter) {
 		List<Map.Entry<String, B>> entries = getOrderedBeansOfType(beanFactory, beanType, this.seen);
 		for (Entry<String, B> entry : entries) {
 			String beanName = entry.getKey();
 			B bean = entry.getValue();
+
+			// 避免因为重复定义 RegistrationBean
 			if (this.seen.add(bean)) {
 				// One that we haven't already seen
+				// 将 Servlet、Filter 等用 RegistrationBean 包装起来
 				RegistrationBean registration = adapter.createRegistrationBean(beanName, bean, entries.size());
 				int order = getOrder(bean);
 				registration.setOrder(order);
+
+				// 添加到 initializers
 				this.initializers.add(type, registration);
 				if (logger.isTraceEnabled()) {
 					logger.trace("Created " + type.getSimpleName() + " initializer for bean '" + beanName + "'; order="
@@ -205,7 +225,7 @@ public class ServletContextInitializerBeans extends AbstractCollection<ServletCo
 	}
 
 	private <T> List<Entry<String, T>> getOrderedBeansOfType(ListableBeanFactory beanFactory, Class<T> type,
-			Set<?> excludes) {
+															 Set<?> excludes) {
 		String[] names = beanFactory.getBeanNamesForType(type, true, false);
 		Map<String, T> map = new LinkedHashMap<>();
 		for (String name : names) {
@@ -229,7 +249,7 @@ public class ServletContextInitializerBeans extends AbstractCollection<ServletCo
 	}
 
 	private void logMappings(String name, MultiValueMap<Class<?>, ServletContextInitializer> initializers,
-			Class<?> type, Class<? extends RegistrationBean> registrationType) {
+							 Class<?> type, Class<? extends RegistrationBean> registrationType) {
 		List<ServletContextInitializer> registrations = new ArrayList<>();
 		registrations.addAll(initializers.getOrDefault(registrationType, Collections.emptyList()));
 		registrations.addAll(initializers.getOrDefault(type, Collections.emptyList()));
@@ -306,7 +326,7 @@ public class ServletContextInitializerBeans extends AbstractCollection<ServletCo
 
 		@Override
 		public RegistrationBean createRegistrationBean(String name, EventListener source,
-				int totalNumberOfSourceBeans) {
+													   int totalNumberOfSourceBeans) {
 			return new ServletListenerRegistrationBean<>(source);
 		}
 

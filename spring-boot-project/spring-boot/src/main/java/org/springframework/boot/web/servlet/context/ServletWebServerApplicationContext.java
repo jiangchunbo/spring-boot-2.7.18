@@ -187,6 +187,7 @@ public class ServletWebServerApplicationContext extends GenericWebApplicationCon
 		WebServer webServer = this.webServer;
 		ServletContext servletContext = getServletContext();
 		if (webServer == null && servletContext == null) {
+			// 开始记录 createWebServer
 			StartupStep createWebServer = this.getApplicationStartup().start("spring.boot.webserver.create");
 
 			// 获得 WebServer 的工厂
@@ -194,7 +195,7 @@ public class ServletWebServerApplicationContext extends GenericWebApplicationCon
 			createWebServer.tag("factory", factory.getClass().toString());
 
 			// 通过工厂创建 WebServer
-			this.webServer = factory.getWebServer(getSelfInitializer());
+			this.webServer = factory.getWebServer(getSelfInitializer()); // 其实也可以直接写成 this::selfInitialize
 			createWebServer.end();
 			getBeanFactory().registerSingleton("webServerGracefulShutdown",
 					new WebServerGracefulShutdownLifecycle(this.webServer));
