@@ -33,6 +33,9 @@ import org.springframework.stereotype.Indexed;
  * standard {@code @Configuration} annotation so that configuration can be found
  * automatically (for example in tests).
  * <p>
+ * 之所以设计这个特殊的配置类，Spring Boot 官方说方便找到，比如给 tests 去方便找。
+ *
+ * <p>
  * Application should only ever include <em>one</em> {@code @SpringBootConfiguration} and
  * most idiomatic Spring Boot applications will inherit it from
  * {@code @SpringBootApplication}.
@@ -67,6 +70,7 @@ public @interface SpringBootConfiguration {
 	 * individually like when declared on non-{@code @Configuration} classes, a.k.a.
 	 * "@Bean Lite Mode" (see {@link Bean @Bean's javadoc}). It is therefore behaviorally
 	 * equivalent to removing the {@code @Configuration} stereotype.
+	 *
 	 * @return whether to proxy {@code @Bean} methods
 	 * @since 2.2
 	 */

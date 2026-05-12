@@ -72,9 +72,10 @@ public class WebServerFactoryCustomizerBeanPostProcessor implements BeanPostProc
 
 	@SuppressWarnings("unchecked")
 	private void postProcessBeforeInitialization(WebServerFactory webServerFactory) {
+		// getCustomizers() 获取所有 bean (迭代)
 		// 获取容器中所有的 WebServerFactoryCustomizer，稍后循环调用它们的 customize
-		LambdaSafe.callbacks(WebServerFactoryCustomizer.class, getCustomizers(), webServerFactory)
-				.withLogger(WebServerFactoryCustomizerBeanPostProcessor.class)
+		LambdaSafe.callbacks(WebServerFactoryCustomizer.class, getCustomizers(), webServerFactory) // callbacks 只是构造了一个对象(一个循环调用蓝图)
+				.withLogger(WebServerFactoryCustomizerBeanPostProcessor.class) // 附加 Logger
 				.invoke((customizer) -> customizer.customize(webServerFactory));
 
 		// ps 看起来复杂的原因是 LambdaSafe 会检查每一个 customizer 它们的泛型参数是否是 WebServerFactory

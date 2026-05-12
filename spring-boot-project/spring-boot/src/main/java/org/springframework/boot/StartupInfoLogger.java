@@ -57,23 +57,30 @@ class StartupInfoLogger {
 	}
 
 	void logStarted(Log applicationLog, Duration timeTakenToStartup) {
+		// 如果开启了 info 就会输出在多长时间内启动完毕
 		if (applicationLog.isInfoEnabled()) {
 			applicationLog.info(getStartedMessage(timeTakenToStartup));
 		}
 	}
 
+	/**
+	 * 构造 Spring Boot 刚开始启动时的一些信息
+	 */
 	private CharSequence getStartingMessage() {
 		StringBuilder message = new StringBuilder();
 		message.append("Starting ");
-		appendApplicationName(message);
-		appendVersion(message, this.sourceClass);
-		appendJavaVersion(message);
-		appendOn(message);
-		appendPid(message);
+		appendApplicationName(message); // 应用名称，通常是启动类名
+		appendVersion(message, this.sourceClass); // MANIFEST.MF 版本号
+		appendJavaVersion(message); // Java 运行时版本
+		appendOn(message); // on <主机名>
+		appendPid(message); // with PID
 		appendContext(message);
 		return message;
 	}
 
+	/**
+	 * 打印 Spring Boot、Spring Framework 版本号
+	 */
 	private CharSequence getRunningMessage() {
 		StringBuilder message = new StringBuilder();
 		message.append("Running with Spring Boot");
@@ -93,8 +100,7 @@ class StartupInfoLogger {
 		try {
 			double uptime = ManagementFactory.getRuntimeMXBean().getUptime() / 1000.0;
 			message.append(" (JVM running for ").append(uptime).append(")");
-		}
-		catch (Throwable ex) {
+		} catch (Throwable ex) {
 			// No JVM time available
 		}
 		return message;
@@ -111,6 +117,8 @@ class StartupInfoLogger {
 
 	private void appendOn(StringBuilder message) {
 		long startTime = System.currentTimeMillis();
+
+		// 主机名，通过本机地址解析得到主机名
 		append(message, "on ", () -> InetAddress.getLocalHost().getHostName());
 		long resolveTime = System.currentTimeMillis() - startTime;
 		if (resolveTime > HOST_NAME_RESOLVE_THRESHOLD) {
@@ -135,11 +143,17 @@ class StartupInfoLogger {
 
 	private void appendContext(StringBuilder message) {
 		StringBuilder context = new StringBuilder();
+
+		// 应用路径
 		ApplicationHome home = new ApplicationHome(this.sourceClass);
 		if (home.getSource() != null) {
 			context.append(home.getSource().getAbsolutePath());
 		}
+
+		// 启动用户
 		append(context, "started by ", () -> System.getProperty("user.name"));
+
+		//
 		append(context, "in ", () -> System.getProperty("user.dir"));
 		if (context.length() > 0) {
 			message.append(" (");
@@ -172,8 +186,7 @@ class StartupInfoLogger {
 	private Object callIfPossible(Callable<Object> call) {
 		try {
 			return call.call();
-		}
-		catch (Exception ex) {
+		} catch (Exception ex) {
 			return null;
 		}
 	}

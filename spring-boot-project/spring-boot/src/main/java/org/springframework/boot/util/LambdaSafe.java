@@ -160,6 +160,7 @@ public final class LambdaSafe {
 		}
 
 		protected final <R> InvocationResult<R> invoke(C callbackInstance, Supplier<R> supplier) {
+			// 比如 callbackType == WebServerFactoryCustomizer
 			if (this.filter.match(this.callbackType, callbackInstance, this.argument, this.additionalArguments)) {
 				try {
 					return InvocationResult.of(supplier.get());
@@ -291,6 +292,7 @@ public final class LambdaSafe {
 		 * @param invoker the invoker used to invoke the callback
 		 */
 		public void invoke(Consumer<C> invoker) {
+			// 这个方法重点看 forEach 里面的 invoke，当条件满足，才会调用 invoke 第二个参数（写的很绕）
 			this.callbackInstances.forEach((callbackInstance) -> invoke(callbackInstance, () -> {
 				invoker.accept(callbackInstance);
 				return null;
@@ -355,6 +357,9 @@ public final class LambdaSafe {
 	 */
 	private static class GenericTypeFilter<C, A> implements Filter<C, A> {
 
+		/**
+		 * callbackInstance 关于  C 这个类型，比如 WebServerFactoryCustomizer，它的泛型类型到底是否兼容 argument 的赋值(类型相等，或者是其父类)
+		 */
 		@Override
 		public boolean match(Class<C> callbackType, C callbackInstance, A argument, Object[] additionalArguments) {
 			ResolvableType type = ResolvableType.forClass(callbackType, callbackInstance.getClass());

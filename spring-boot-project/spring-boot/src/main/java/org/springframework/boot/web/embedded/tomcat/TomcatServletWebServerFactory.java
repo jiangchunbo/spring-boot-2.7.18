@@ -293,6 +293,7 @@ public class TomcatServletWebServerFactory extends AbstractServletWebServerFacto
 	}
 
 	private void addDefaultServlet(Context context) {
+		// Wrapper 对于 Tomcat 来说就是 Servlet
 		Wrapper defaultServlet = context.createWrapper();
 		defaultServlet.setName("default");
 		defaultServlet.setServletClass("org.apache.catalina.servlets.DefaultServlet");

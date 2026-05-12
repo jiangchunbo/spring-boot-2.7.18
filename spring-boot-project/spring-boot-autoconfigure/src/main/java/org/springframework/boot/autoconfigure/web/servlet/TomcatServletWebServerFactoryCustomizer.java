@@ -40,6 +40,11 @@ public class TomcatServletWebServerFactoryCustomizer
 		this.serverProperties = serverProperties;
 	}
 
+	/**
+	 * 排序值是 0，用户定义那么就会是一个比较低的优先级，所以排到后面
+	 *
+	 * @return 排序值
+	 */
 	@Override
 	public int getOrder() {
 		return 0;
@@ -63,7 +68,7 @@ public class TomcatServletWebServerFactoryCustomizer
 	}
 
 	private void customizeUseRelativeRedirects(ConfigurableTomcatWebServerFactory factory,
-			boolean useRelativeRedirects) {
+	                                           boolean useRelativeRedirects) {
 		factory.addContextCustomizers((context) -> context.setUseRelativeRedirects(useRelativeRedirects));
 	}
 

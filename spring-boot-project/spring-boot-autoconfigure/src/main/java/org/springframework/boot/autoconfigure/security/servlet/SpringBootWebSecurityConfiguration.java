@@ -95,6 +95,12 @@ class SpringBootWebSecurityConfiguration {
 	 * already been added or if a bean with name
 	 * {@value BeanIds#SPRING_SECURITY_FILTER_CHAIN} has been configured by the user, this
 	 * will back-off.
+	 *
+	 * <p>如果 Spring Security 在类路径上，则添加 @EnableWebSecurity 注解。
+	 * 这样可以确保在默认的安全自动配置下该注解存在，并且在用户添加自定义安全配置但忘记添加该注解时也会启用。
+	 * 如果已经手动添加了 @EnableWebSecurity 注解，或用户已配置名称为
+	 * {@value BeanIds#SPRING_SECURITY_FILTER_CHAIN} 的 bean，则该自动启用配置将回退（不生效）。
+	 * </p>
 	 */
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnMissingBean(name = BeanIds.SPRING_SECURITY_FILTER_CHAIN)

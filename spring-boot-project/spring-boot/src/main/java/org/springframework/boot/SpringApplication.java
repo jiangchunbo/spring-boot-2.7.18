@@ -188,6 +188,9 @@ public class SpringApplication {
 
 	private Banner.Mode bannerMode = Banner.Mode.CONSOLE;
 
+	/**
+	 * 应用启动阶段的概要信息是否输出到日志（默认是 true）
+	 */
 	private boolean logStartupInfo = true;
 
 	/**
@@ -375,7 +378,7 @@ public class SpringApplication {
 			// 刷新后
 			afterRefresh(context, applicationArguments);
 
-			// 停止记时。afterRefresh 之后就停止了
+			// 记录启动时间
 			Duration timeTakenToStartup = Duration.ofNanos(System.nanoTime() - startTime);
 			if (this.logStartupInfo) {
 				new StartupInfoLogger(this.mainApplicationClass).logStarted(getApplicationLog(), timeTakenToStartup);
